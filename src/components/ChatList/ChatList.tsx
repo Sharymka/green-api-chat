@@ -51,7 +51,11 @@ export function ChatList({ chats, activeChatId, onSelect }: ChatListProps) {
                 </span>
                 <span className={styles.row}>
                   <span className={styles.preview}>
-                    {last ? (last.direction === 'out' ? `Вы: ${last.text}` : last.text) : ''}
+                    {last
+                      ? last.direction === 'out'
+                        ? `Вы: ${last.text}`
+                        : last.text
+                      : 'Нет сообщений'}
                   </span>
                   {chat.unread > 0 && (
                     <span className={styles.badge}>

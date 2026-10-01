@@ -87,6 +87,18 @@ describe('список чатов', () => {
     expect(item).toHaveTextContent('1 непрочитанных')
   })
 
+  it('в пустом чате подсказывает написать первым', async () => {
+    const user = renderMessenger([{ chatId: IVAN, name: 'Иван' }])
+    expect(within(chatList()).getByRole('button', { name: /Иван/ })).toHaveTextContent(
+      'Нет сообщений',
+    )
+
+    await user.click(within(chatList()).getByRole('button', { name: /Иван/ }))
+
+    expect(screen.getByText('Сообщений пока нет')).toBeInTheDocument()
+    expect(screen.getByText(/придёт в WhatsApp на номер \+7 900 123-45-67/)).toBeInTheDocument()
+  })
+
   it('кнопка «Назад» закрывает чат (для телефона)', async () => {
     const user = renderMessenger([{ chatId: IVAN, name: 'Иван' }])
     await user.click(within(chatList()).getByRole('button', { name: /Иван/ }))

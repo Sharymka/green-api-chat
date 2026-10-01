@@ -29,7 +29,14 @@ export function ChatPane({ chat, onBack }: ChatPaneProps) {
           {chat.name && <p className={styles.subtitle}>{phone}</p>}
         </div>
       </header>
-      <div className={styles.messages} />
+      <div className={styles.messages}>
+        {chat.messages.length === 0 && chat.history !== 'loading' && (
+          <div className={styles.empty}>
+            <p className={styles.emptyTitle}>Сообщений пока нет</p>
+            <p>Напишите первым — сообщение придёт в WhatsApp на номер {phone}</p>
+          </div>
+        )}
+      </div>
     </section>
   )
 }
