@@ -33,6 +33,16 @@ describe('вход и выход', () => {
     expect(state).toEqual(createInitialState(credentials))
   })
 
+  it('при входе восстанавливает сохранённый список чатов', () => {
+    const state = reduce(
+      [{ type: 'loggedIn', credentials, chats: [{ chatId: IVAN, name: 'Иван' }] }],
+      createInitialState(),
+    )
+    expect(state.chats).toEqual([
+      { chatId: IVAN, name: 'Иван', messages: [], unread: 0, history: 'idle' },
+    ])
+  })
+
   it('при выходе стирает данные входа и все чаты', () => {
     const state = reduce([{ type: 'chatOpened', chatId: IVAN }, { type: 'loggedOut' }])
     expect(state).toEqual(createInitialState())
@@ -176,6 +186,61 @@ describe('получение', () => {
       { type: 'messageReceived', message: incoming() },
     ])
     expect(state.chats.map((c) => c.chatId)).toEqual([IVAN, MARIA])
+  })
+})
+
+describe('история переписки', () => {
+  const fromHistory = {
+    id: 'OLD-1',
+    idMessage: 'OLD-1',
+    text: 'Старое сообщение',
+    direction: 'in' as const,
+    timestamp: 500,
+  }
+
+  it('отмечает, что история загружается', () => {
+    const state = reduce([
+      { type: 'chatOpened', chatId: IVAN },
+      { type: 'historyRequested', chatId: IVAN },
+    ])
+    expect(state.chats[0]?.history).toBe('loading')
+  })
+
+  it('склеивает историю с сообщениями, которые уже есть в памяти', () => {
+    const state = reduce([
+      { type: 'chatOpened', chatId: IVAN },
+      { type: 'messageReceived', message: incoming() },
+      { type: 'historyRequested', chatId: IVAN },
+      // Журнал уже успел записать IN-1 — он не должен задвоиться
+      {
+        type: 'historyLoaded',
+        chatId: IVAN,
+        messages: [fromHistory, { ...fromHistory, id: 'IN-1', idMessage: 'IN-1' }],
+        name: 'Иван Иванович',
+      },
+    ])
+    const chat = state.chats[0]
+    expect(chat?.history).toBe('loaded')
+    expect(chat?.messages.map((m) => m.idMessage)).toEqual(['OLD-1', 'IN-1'])
+    // Имя из уведомления уже было — не перезаписываем
+    expect(chat?.name).toBe('Иван')
+  })
+
+  it('берёт имя из истории, если его ещё не знали', () => {
+    const state = reduce([
+      { type: 'chatOpened', chatId: IVAN },
+      { type: 'historyLoaded', chatId: IVAN, messages: [], name: 'Иван Иванович' },
+    ])
+    expect(state.chats[0]?.name).toBe('Иван Иванович')
+  })
+
+  it('запоминает ошибку загрузки истории', () => {
+    const state = reduce([
+      { type: 'chatOpened', chatId: IVAN },
+      { type: 'historyRequested', chatId: IVAN },
+      { type: 'historyFailed', chatId: IVAN },
+    ])
+    expect(state.chats[0]?.history).toBe('error')
   })
 })
 

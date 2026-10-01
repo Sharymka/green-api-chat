@@ -1,5 +1,7 @@
 import type { Credentials } from '../api/greenApi'
+import { mergeMessages } from '../utils/history'
 import type { IncomingMessage } from '../utils/notifications'
+import type { SavedChat } from './chatsStorage'
 
 export type MessageStatus = 'pending' | 'sent' | 'failed'
 
@@ -22,6 +24,8 @@ export interface Chat {
   name?: string
   messages: Message[]
   unread: number
+  /** Загрузка старой переписки через getChatHistory: ещё не грузили, грузим, загрузили, ошибка. */
+  history: 'idle' | 'loading' | 'loaded' | 'error'
 }
 
 export interface ChatState {
@@ -33,7 +37,7 @@ export interface ChatState {
 }
 
 export type ChatAction =
-  | { type: 'loggedIn'; credentials: Credentials }
+  | { type: 'loggedIn'; credentials: Credentials; chats?: SavedChat[] }
   | { type: 'loggedOut' }
   | { type: 'chatOpened'; chatId: string }
   | { type: 'chatClosed' }
@@ -42,10 +46,25 @@ export type ChatAction =
   | { type: 'messageFailed'; chatId: string; id: string }
   | { type: 'messageRetried'; chatId: string; id: string }
   | { type: 'messageReceived'; message: IncomingMessage }
+  | { type: 'historyRequested'; chatId: string }
+  | { type: 'historyLoaded'; chatId: string; messages: Message[]; name?: string }
+  | { type: 'historyFailed'; chatId: string }
   | { type: 'connectionChanged'; connection: ChatState['connection'] }
 
-export function createInitialState(credentials: Credentials | null = null): ChatState {
-  return { credentials, chats: [], activeChatId: null, connection: 'online' }
+function newChat({ chatId, name }: SavedChat): Chat {
+  return { chatId, name, messages: [], unread: 0, history: 'idle' }
+}
+
+export function createInitialState(
+  credentials: Credentials | null = null,
+  savedChats: SavedChat[] = [],
+): ChatState {
+  return {
+    credentials,
+    chats: credentials ? savedChats.map(newChat) : [],
+    activeChatId: null,
+    connection: 'online',
+  }
 }
 
 /** Меняет один чат и поднимает его наверх списка (если moveToTop). */
@@ -75,7 +94,7 @@ function setStatus(chat: Chat, id: string, status: MessageStatus, idMessage?: st
 export function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
     case 'loggedIn':
-      return createInitialState(action.credentials)
+      return createInitialState(action.credentials, action.chats)
 
     case 'loggedOut':
       // Стираем всё: следующий человек за этим компьютером не должен увидеть чужие переписки
@@ -85,7 +104,7 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
       const exists = state.chats.some((c) => c.chatId === action.chatId)
       const chats = exists
         ? updateChat(state.chats, action.chatId, (chat) => ({ ...chat, unread: 0 }))
-        : [{ chatId: action.chatId, messages: [], unread: 0 }, ...state.chats]
+        : [newChat({ chatId: action.chatId }), ...state.chats]
       return { ...state, chats, activeChatId: action.chatId }
     }
 
@@ -164,6 +183,29 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
       )
       return { ...state, chats }
     }
+
+    case 'historyRequested':
+      return {
+        ...state,
+        chats: updateChat(state.chats, action.chatId, (chat) => ({ ...chat, history: 'loading' })),
+      }
+
+    case 'historyLoaded':
+      return {
+        ...state,
+        chats: updateChat(state.chats, action.chatId, (chat) => ({
+          ...chat,
+          name: chat.name ?? action.name,
+          history: 'loaded',
+          messages: mergeMessages(chat.messages, action.messages),
+        })),
+      }
+
+    case 'historyFailed':
+      return {
+        ...state,
+        chats: updateChat(state.chats, action.chatId, (chat) => ({ ...chat, history: 'error' })),
+      }
 
     case 'connectionChanged':
       if (state.connection === action.connection) return state

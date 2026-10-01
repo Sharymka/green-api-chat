@@ -144,3 +144,22 @@ export async function deleteNotification(
   })
   return data?.result ?? false
 }
+
+/**
+ * Последние сообщения переписки с одним собеседником (новые — первыми).
+ * Записи отдаём как есть: разбираем их отдельно, в utils/history.ts.
+ */
+export async function getChatHistory(
+  credentials: Credentials,
+  chatId: string,
+  count = 50,
+  signal?: AbortSignal,
+): Promise<unknown[]> {
+  const data = await request<unknown>(credentials, 'getChatHistory', {
+    method: 'POST',
+    body: { chatId, count },
+    signal,
+  })
+  if (!Array.isArray(data)) throw new ApiError('server')
+  return data
+}

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, getErrorMessage, isRetryable } from './errors'
 import {
   deleteNotification,
+  getChatHistory,
   getStateInstance,
   receiveNotification,
   sendMessage,
@@ -171,6 +172,25 @@ describe('deleteNotification', () => {
       'https://7107.api.greenapi.com/waInstance7107000001/deleteNotification/test-token/15',
     )
     expect(init?.method).toBe('DELETE')
+  })
+})
+
+describe('getChatHistory', () => {
+  it('отправляет chatId и count и возвращает список записей', async () => {
+    const items = [{ type: 'incoming', idMessage: 'A', textMessage: 'Привет' }]
+    respond(200, JSON.stringify(items))
+
+    await expect(getChatHistory(credentials, '79001234567@c.us', 30)).resolves.toEqual(items)
+    const [url, init] = fetchMock.mock.calls[0]!
+    expect(url).toBe('https://7107.api.greenapi.com/waInstance7107000001/getChatHistory/test-token')
+    expect(init?.method).toBe('POST')
+    expect(JSON.parse(init?.body as string)).toEqual({ chatId: '79001234567@c.us', count: 30 })
+  })
+
+  it('считает ошибкой ответ, который не является списком', async () => {
+    respond(200, '{}')
+
+    expect((await catchError(getChatHistory(credentials, '79001234567@c.us'))).kind).toBe('server')
   })
 })
 
