@@ -1,15 +1,16 @@
 import { PersonIcon } from './icons'
 import styles from './Avatar.module.css'
 
-// Приглушённые цветные градиенты для аватарок — как в Telegram, только спокойнее
+// Приглушённые градиенты для аватарок, как в Telegram, но спокойнее:
+// сверху светлый пастельный оттенок, снизу — более глубокий того же цвета
 const GRADIENTS = [
-  ['#e9a99c', '#d9877d'], // красный
-  ['#f0c99d', '#e0a978'], // оранжевый
-  ['#b6b9e9', '#9192d6'], // фиолетовый
-  ['#b8d8a6', '#90bf88'], // зелёный
-  ['#a2d9d0', '#76beb3'], // бирюзовый
-  ['#a7cde7', '#7aacd4'], // голубой
-  ['#ddb4e4', '#c592d2'], // розовый
+  ['#f4c3b8', '#c96f69'], // красный
+  ['#f7dcb5', '#d39461'], // оранжевый
+  ['#d2d4f5', '#7778c4'], // фиолетовый
+  ['#d3ebc4', '#76a971'], // зелёный
+  ['#c3ece5', '#5aa89d'], // бирюзовый
+  ['#c6e2f4', '#5f93c2'], // голубой
+  ['#eccdf1', '#ab74bd'], // розовый
 ] as const
 
 /**
@@ -41,7 +42,8 @@ export function Avatar({ seed, name, size = 49 }: AvatarProps) {
         width: size,
         height: size,
         fontSize: size * 0.42,
-        background: `linear-gradient(180deg, ${from}, ${to})`,
+        // Мягкий блик сверху слева поверх диагонального градиента — аватарка выглядит объёмнее
+        background: `radial-gradient(circle at 30% 25%, rgb(255 255 255 / 0.35), transparent 55%), linear-gradient(145deg, ${from}, ${to})`,
       }}
       aria-hidden="true"
     >
