@@ -1,9 +1,10 @@
+import { LoginScreen } from './components/LoginScreen/LoginScreen'
+import { MessengerScreen } from './components/MessengerScreen/MessengerScreen'
+import { useChat } from './state/chatContext'
+
 function App() {
-  return (
-    <main>
-      <h1>GREEN-API Chat</h1>
-    </main>
-  )
+  const { state } = useChat()
+  return state.credentials ? <MessengerScreen /> : <LoginScreen />
 }
 
 export default App

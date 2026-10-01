@@ -1,0 +1,106 @@
+.page {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100%;
+  padding: 72px 16px 32px;
+}
+
+/* Зелёная полоса сверху, как на стартовой странице WhatsApp Web */
+.banner {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 220px;
+  background: var(--color-header);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  background: var(--color-panel);
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.subtitle {
+  margin: 0 0 24px;
+  color: var(--color-text-muted);
+}
+
+.subtitle a {
+  color: var(--color-accent);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.toggle {
+  flex-shrink: 0;
+  margin-right: 4px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--color-panel-hover);
+}
+
+.formError {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border: none;
+  border-radius: 24px;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.submit:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding-top: 32px;
+  }
+
+  .card {
+    padding: 24px 20px;
+  }
+}
