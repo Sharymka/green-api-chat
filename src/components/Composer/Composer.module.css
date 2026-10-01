@@ -23,10 +23,6 @@
   outline: none;
 }
 
-.input:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-accent);
-}
-
 .input[aria-invalid='true'] {
   box-shadow: 0 0 0 2px var(--color-danger);
 }
