@@ -3,6 +3,8 @@
 :root {
   --color-accent: #00a884;
   --color-accent-hover: #008f6f;
+  /* Градиент для главных кнопок: от тёмно-зелёного шапки к яркому акценту и обратно */
+  --gradient-accent: linear-gradient(110deg, #006b58 0%, #008069 40%, #00957a 65%, #006b58 100%);
   --color-accent-contrast: #ffffff;
   --color-header: #008069;
 
@@ -24,9 +26,9 @@
   --color-skeleton: #e1e4e6;
   --color-focus: #027eb5;
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
   --shadow-card: 0 1px 3px rgb(11 20 26 / 0.13);
 
   --font: 'Segoe UI', Helvetica, Arial, system-ui, sans-serif;
@@ -38,6 +40,7 @@
   :root {
     --color-accent: #00a884;
     --color-accent-hover: #06cf9c;
+    --gradient-accent: linear-gradient(110deg, #00a884 0%, #06cf9c 45%, #25d366 70%, #00a884 100%);
     --color-accent-contrast: #111b21;
     --color-header: #202c33;
 
