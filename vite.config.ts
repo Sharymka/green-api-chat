@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // GitHub Pages serves the site from /<repo-name>/
+  // GitHub Pages открывает сайт не в корне домена, а в папке с именем репозитория
   base: '/green-api-chat/',
   plugins: [react()],
   test: {

@@ -11,7 +11,7 @@ export type InstanceState =
 
 export interface Notification {
   receiptId: number
-  /** Raw notification body; parsed separately because its shape depends on the type. */
+  /** Уведомление как есть. Разбираем его отдельно, потому что у разных типов разная структура. */
   body: unknown
 }
 
@@ -19,7 +19,7 @@ const DEFAULT_TIMEOUT_MS = 15_000
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'DELETE'
-  /** Extra path segment after the token, e.g. receiptId. */
+  /** Что дописать в адрес после токена, например receiptId. */
   pathSuffix?: string
   query?: Record<string, string>
   body?: unknown
@@ -48,7 +48,7 @@ async function request<T>(
   if (pathSuffix) url += `/${encodeURIComponent(pathSuffix)}`
   if (query) url += `?${new URLSearchParams(query).toString()}`
 
-  // One controller aborts the request either on timeout or when the caller cancels.
+  // Обрываем запрос в двух случаях: сервер слишком долго молчит или нас попросили отменить (например, при выходе).
   const controller = new AbortController()
   let timedOut = false
   const timer = setTimeout(() => {
@@ -76,7 +76,7 @@ async function request<T>(
 
     if (!response.ok) throw new ApiError(errorKindFromStatus(response.status), response.status)
 
-    // receiveNotification answers with an empty body or `null` when the queue is empty
+    // Если новых уведомлений нет, receiveNotification отвечает пустотой или `null`
     const text = await response.text()
     if (!text) return null
     try {
@@ -117,8 +117,8 @@ export async function sendMessage(
 }
 
 /**
- * Long polling: the server holds the request for up to `receiveTimeoutSec`
- * and returns `null` if no notification arrived.
+ * Спрашиваем, нет ли новых уведомлений. Сервер не отвечает сразу, а ждёт до `receiveTimeoutSec` секунд:
+ * если за это время что-то пришло — отдаёт уведомление, если нет — `null`.
  */
 export async function receiveNotification(
   credentials: Credentials,

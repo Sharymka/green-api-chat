@@ -4,7 +4,7 @@ export const MAX_MESSAGE_LENGTH = 20_000
 
 export type CredentialsErrors = Partial<Record<keyof Credentials, string>>
 
-/** Hosts the token may be sent to: anything else could leak it to a third party. */
+/** Куда разрешено отправлять токен. Любой другой адрес может оказаться чужим сервером, и токен утечёт. */
 const ALLOWED_HOSTS = [/^([\w-]+\.)*api\.greenapi\.com$/, /^([\w-]+\.)*api\.green-api\.com$/]
 
 export function normalizeApiUrl(input: string): string {

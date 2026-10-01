@@ -27,13 +27,13 @@ export class ApiError extends Error {
 export function errorKindFromStatus(status: number): ApiErrorKind {
   if (status === 401 || status === 403) return 'unauthorized'
   if (status === 429) return 'rateLimit'
-  // GREEN-API returns 466 when the tariff quota is exhausted
+  // 466 GREEN-API присылает, когда закончился лимит тарифа
   if (status === 466) return 'quotaExceeded'
   if (status >= 500) return 'server'
   return 'badRequest'
 }
 
-/** Temporary failures that make sense to retry later. */
+/** Временные сбои: через какое-то время запрос может пройти, поэтому его есть смысл повторить. */
 export function isRetryable(error: unknown): boolean {
   return (
     error instanceof ApiError &&

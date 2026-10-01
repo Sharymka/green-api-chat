@@ -20,7 +20,7 @@ function respond(status: number, body = '') {
   fetchMock.mockResolvedValueOnce(new Response(body || null, { status }))
 }
 
-/** A fetch that never answers until its signal is aborted, like a hanging request. */
+/** Имитирует «зависший» запрос: ответа нет, пока запрос не оборвут. */
 function hang() {
   fetchMock.mockImplementationOnce(
     (_url, init) =>

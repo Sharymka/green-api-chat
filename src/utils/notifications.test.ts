@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseIncomingMessage } from './notifications'
 
-/** Shape taken from the GREEN-API docs for an incoming text message. */
+/** Входящее сообщение в том виде, как его показывает документация GREEN-API. */
 function incoming(messageData: unknown, overrides: Record<string, unknown> = {}) {
   return {
     typeWebhook: 'incomingMessageReceived',

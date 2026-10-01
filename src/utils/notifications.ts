@@ -2,7 +2,7 @@ export interface IncomingMessage {
   idMessage: string
   chatId: string
   text: string
-  /** Unix time in seconds, as sent by GREEN-API. */
+  /** Время отправки в секундах (так присылает GREEN-API). */
   timestamp: number
   senderName?: string
 }
@@ -21,7 +21,7 @@ function extractText(messageData: Record<string, unknown>): string | undefined {
       const data = messageData.textMessageData
       return isRecord(data) ? getString(data.textMessage) : undefined
     }
-    // A text with a link and a reply to another message keep the text in the same place
+    // У текста со ссылкой и у ответа на сообщение текст лежит в одном и том же месте
     case 'extendedTextMessage':
     case 'quotedMessage': {
       const data = messageData.extendedTextMessageData
@@ -33,8 +33,8 @@ function extractText(messageData: Record<string, unknown>): string | undefined {
 }
 
 /**
- * Picks an incoming text message from a private chat out of a raw notification body.
- * Returns null for everything else (statuses, media, group chats, malformed data).
+ * Достаёт из уведомления входящее текстовое сообщение из личного чата.
+ * Для всего остального (статусы, фото, группы, непонятные данные) возвращает null — такое мы не показываем.
  */
 export function parseIncomingMessage(body: unknown): IncomingMessage | null {
   if (!isRecord(body) || body.typeWebhook !== 'incomingMessageReceived') return null
