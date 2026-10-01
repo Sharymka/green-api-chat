@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import App from './App'
 
 describe('App', () => {
-  it('renders the app title', () => {
+  it('показывает заголовок приложения', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: 'GREEN-API Chat' })).toBeInTheDocument()
   })

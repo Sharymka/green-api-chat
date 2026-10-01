@@ -28,7 +28,7 @@ const expected = {
 }
 
 describe('parseIncomingMessage', () => {
-  it('parses a plain text message', () => {
+  it('разбирает обычное текстовое сообщение', () => {
     const body = incoming({
       typeMessage: 'textMessage',
       textMessageData: { textMessage: 'Привет' },
@@ -36,12 +36,12 @@ describe('parseIncomingMessage', () => {
     expect(parseIncomingMessage(body)).toEqual(expected)
   })
 
-  it.each(['extendedTextMessage', 'quotedMessage'])('parses %s', (typeMessage) => {
+  it.each(['extendedTextMessage', 'quotedMessage'])('разбирает %s', (typeMessage) => {
     const body = incoming({ typeMessage, extendedTextMessageData: { text: 'Привет' } })
     expect(parseIncomingMessage(body)).toEqual(expected)
   })
 
-  it('falls back to chatName when senderName is missing', () => {
+  it('берёт chatName, если нет senderName', () => {
     const body = incoming(
       { typeMessage: 'textMessage', textMessageData: { textMessage: 'Привет' } },
       { senderData: { chatId: '79001234567@c.us', chatName: 'Иван' } },
@@ -51,28 +51,28 @@ describe('parseIncomingMessage', () => {
 
   it.each([
     ['null', null],
-    ['a status notification', { typeWebhook: 'outgoingMessageStatus', status: 'read' }],
-    ['an image', incoming({ typeMessage: 'imageMessage', fileMessageData: {} })],
+    ['статус доставки', { typeWebhook: 'outgoingMessageStatus', status: 'read' }],
+    ['фото', incoming({ typeMessage: 'imageMessage', fileMessageData: {} })],
     [
-      'a group message',
+      'сообщение из группы',
       incoming(
         { typeMessage: 'textMessage', textMessageData: { textMessage: 'Привет' } },
         { senderData: { chatId: '120363369140947676@g.us' } },
       ),
     ],
     [
-      'an empty text',
+      'пустой текст',
       incoming({ typeMessage: 'textMessage', textMessageData: { textMessage: '' } }),
     ],
-    ['missing messageData', incoming(undefined)],
+    ['нет messageData', incoming(undefined)],
     [
-      'missing idMessage',
+      'нет idMessage',
       incoming(
         { typeMessage: 'textMessage', textMessageData: { textMessage: 'Привет' } },
         { idMessage: undefined },
       ),
     ],
-  ])('ignores %s', (_name, body) => {
+  ])('пропускает: %s', (_name, body) => {
     expect(parseIncomingMessage(body)).toBeNull()
   })
 })

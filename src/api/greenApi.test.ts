@@ -53,7 +53,7 @@ afterEach(() => {
 })
 
 describe('getStateInstance', () => {
-  it('builds the URL from credentials and returns the state', async () => {
+  it('собирает адрес из данных входа и возвращает статус инстанса', async () => {
     respond(200, JSON.stringify({ stateInstance: 'authorized' }))
 
     await expect(getStateInstance(credentials)).resolves.toBe('authorized')
@@ -70,7 +70,7 @@ describe('getStateInstance', () => {
     [429, 'rateLimit'],
     [466, 'quotaExceeded'],
     [502, 'server'],
-  ])('maps HTTP %i to "%s"', async (status, kind) => {
+  ])('HTTP %i → ошибка "%s"', async (status, kind) => {
     respond(status)
 
     const error = await catchError(getStateInstance(credentials))
@@ -78,13 +78,13 @@ describe('getStateInstance', () => {
     expect(error.status).toBe(status)
   })
 
-  it('reports a network error when fetch fails', async () => {
+  it('возвращает network, если нет соединения', async () => {
     fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch'))
 
     expect((await catchError(getStateInstance(credentials))).kind).toBe('network')
   })
 
-  it('reports a timeout when the server does not answer in time', async () => {
+  it('возвращает timeout, если сервер долго молчит', async () => {
     vi.useFakeTimers()
     hang()
 
@@ -93,7 +93,7 @@ describe('getStateInstance', () => {
     expect((await result).kind).toBe('timeout')
   })
 
-  it('reports "aborted" when the caller cancels the request', async () => {
+  it('возвращает aborted, если запрос отменили', async () => {
     hang()
     const controller = new AbortController()
 
@@ -104,7 +104,7 @@ describe('getStateInstance', () => {
 })
 
 describe('sendMessage', () => {
-  it('posts chatId and message as JSON and returns idMessage', async () => {
+  it('отправляет chatId и текст в JSON и возвращает idMessage', async () => {
     respond(200, JSON.stringify({ idMessage: '3EB0C767D097B7C7C030' }))
 
     await expect(sendMessage(credentials, '79001234567@c.us', 'Привет')).resolves.toBe(
@@ -119,7 +119,7 @@ describe('sendMessage', () => {
     })
   })
 
-  it('fails when the response has no idMessage', async () => {
+  it('считает ошибкой ответ без idMessage', async () => {
     respond(200, '{}')
 
     expect((await catchError(sendMessage(credentials, '79001234567@c.us', 'Hi'))).kind).toBe(
@@ -129,7 +129,7 @@ describe('sendMessage', () => {
 })
 
 describe('receiveNotification', () => {
-  it('passes receiveTimeout and returns the notification', async () => {
+  it('передаёт receiveTimeout и возвращает уведомление', async () => {
     const notification = { receiptId: 15, body: { typeWebhook: 'incomingMessageReceived' } }
     respond(200, JSON.stringify(notification))
 
@@ -140,15 +140,15 @@ describe('receiveNotification', () => {
   })
 
   it.each([
-    ['an empty body', ''],
-    ['null', 'null'],
-  ])('returns null when the queue is empty (%s)', async (_name, body) => {
+    ['пустой ответ', ''],
+    ['ответ null', 'null'],
+  ])('возвращает null, если очередь пуста (%s)', async (_name, body) => {
     respond(200, body)
 
     await expect(receiveNotification(credentials)).resolves.toBeNull()
   })
 
-  it('waits longer than receiveTimeout before timing out', async () => {
+  it('не обрывает запрос раньше, чем истечёт receiveTimeout', async () => {
     vi.useFakeTimers()
     hang()
 
@@ -162,7 +162,7 @@ describe('receiveNotification', () => {
 })
 
 describe('deleteNotification', () => {
-  it('sends DELETE with receiptId in the path', async () => {
+  it('отправляет DELETE с receiptId в адресе', async () => {
     respond(200, JSON.stringify({ result: true }))
 
     await expect(deleteNotification(credentials, 15)).resolves.toBe(true)
@@ -174,15 +174,15 @@ describe('deleteNotification', () => {
   })
 })
 
-describe('errors helpers', () => {
-  it('marks only temporary failures as retryable', () => {
+describe('isRetryable и getErrorMessage', () => {
+  it('разрешает повтор только для временных сбоев', () => {
     expect(isRetryable(new ApiError('network'))).toBe(true)
     expect(isRetryable(new ApiError('server', 500))).toBe(true)
     expect(isRetryable(new ApiError('unauthorized', 401))).toBe(false)
     expect(isRetryable(new Error('other'))).toBe(false)
   })
 
-  it('returns a user-facing message', () => {
+  it('возвращает понятный пользователю текст ошибки', () => {
     expect(getErrorMessage(new ApiError('unauthorized', 401))).toBe(
       'Неверный idInstance или apiTokenInstance',
     )

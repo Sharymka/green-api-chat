@@ -13,35 +13,35 @@ describe('validateApiUrl', () => {
     'https://7107.api.greenapi.com/',
     'https://api.green-api.com',
     'https://3100.api.green-api.com',
-  ])('accepts %s', (url) => {
+  ])('пропускает %s', (url) => {
     expect(validateApiUrl(url)).toBeUndefined()
   })
 
   it.each([
-    ['empty', '', 'Укажите apiUrl'],
-    ['not a URL', 'greenapi', 'Некорректный адрес'],
-    ['http', 'http://7107.api.greenapi.com', 'Адрес должен начинаться с https://'],
+    ['пустой адрес', '', 'Укажите apiUrl'],
+    ['не адрес', 'greenapi', 'Некорректный адрес'],
+    ['http вместо https', 'http://7107.api.greenapi.com', 'Адрес должен начинаться с https://'],
     [
-      'foreign host',
+      'чужой домен',
       'https://evil.example.com',
       'Разрешены только адреса GREEN-API (*.api.greenapi.com)',
     ],
     [
-      'look-alike host',
+      'поддельный домен, похожий на настоящий',
       'https://api.greenapi.com.evil.example',
       'Разрешены только адреса GREEN-API (*.api.greenapi.com)',
     ],
     [
-      'path',
+      'адрес с путём',
       'https://7107.api.greenapi.com/waInstance1',
       'Укажите только адрес сервера, например https://7107.api.greenapi.com',
     ],
     [
-      'credentials in URL',
+      'логин и пароль внутри адреса',
       'https://user:pass@7107.api.greenapi.com',
       'Укажите только адрес сервера, например https://7107.api.greenapi.com',
     ],
-  ])('rejects %s', (_name, url, message) => {
+  ])('отклоняет: %s', (_name, url, message) => {
     expect(validateApiUrl(url)).toBe(message)
   })
 })
@@ -53,11 +53,11 @@ describe('validateCredentials', () => {
     apiTokenInstance: 'abc123',
   }
 
-  it('returns no errors for valid values', () => {
+  it('не находит ошибок в правильных данных', () => {
     expect(validateCredentials(valid)).toEqual({})
   })
 
-  it('reports every invalid field', () => {
+  it('сообщает об ошибке в каждом неверном поле', () => {
     expect(validateCredentials({ apiUrl: '', idInstance: '71a', apiTokenInstance: 'a b' })).toEqual(
       {
         apiUrl: 'Укажите apiUrl',
@@ -67,7 +67,7 @@ describe('validateCredentials', () => {
     )
   })
 
-  it('reports empty fields', () => {
+  it('сообщает о пустых полях', () => {
     const errors = validateCredentials({
       apiUrl: valid.apiUrl,
       idInstance: ' ',
@@ -77,7 +77,7 @@ describe('validateCredentials', () => {
     expect(errors.apiTokenInstance).toBe('Укажите apiTokenInstance')
   })
 
-  it('trims values and the trailing slash on normalize', () => {
+  it('убирает лишние пробелы и слэш в конце', () => {
     expect(
       normalizeCredentials({
         apiUrl: ' https://7107.api.greenapi.com/ ',
@@ -89,15 +89,15 @@ describe('validateCredentials', () => {
 })
 
 describe('validateMessage', () => {
-  it('rejects blank messages', () => {
+  it('не пропускает пустое сообщение', () => {
     expect(validateMessage('   \n ')).toBe('Введите сообщение')
   })
 
-  it('rejects messages over the API limit', () => {
+  it('не пропускает сообщение длиннее лимита API', () => {
     expect(validateMessage('a'.repeat(MAX_MESSAGE_LENGTH + 1))).toMatch(/длиннее/)
   })
 
-  it('accepts a normal message', () => {
+  it('пропускает обычное сообщение', () => {
     expect(validateMessage('Привет')).toBeUndefined()
   })
 })
