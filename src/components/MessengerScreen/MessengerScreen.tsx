@@ -7,6 +7,7 @@ import { ChatPane } from '../ChatPane/ChatPane'
 import { NewChatDialog } from '../NewChatDialog/NewChatDialog'
 import { ChatIcon, LogoutIcon, PlusIcon } from '../ui/icons'
 import { IconButton } from '../ui/IconButton'
+import { Menu } from '../ui/Menu'
 import styles from './MessengerScreen.module.css'
 
 export function MessengerScreen() {
@@ -28,14 +29,18 @@ export function MessengerScreen() {
           <IconButton label="Новый чат" tone="accent" onClick={() => setNewChatOpen(true)}>
             <PlusIcon />
           </IconButton>
-          <button
-            type="button"
-            className={styles.logout}
-            onClick={() => dispatch({ type: 'loggedOut' })}
-          >
-            <LogoutIcon width={18} height={18} />
-            Выйти
-          </button>
+          {/* Редкие действия спрятаны в меню «⋮», как в WhatsApp */}
+          <Menu
+            label="Меню"
+            items={[
+              {
+                label: 'Выйти',
+                tone: 'danger',
+                icon: <LogoutIcon width={20} height={20} />,
+                onSelect: () => dispatch({ type: 'loggedOut' }),
+              },
+            ]}
+          />
         </header>
         <ConnectionBanner reconnecting={state.connection === 'reconnecting'} />
         <ChatList

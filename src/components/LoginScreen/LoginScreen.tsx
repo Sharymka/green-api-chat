@@ -95,10 +95,11 @@ export function LoginScreen() {
           Вход в GREEN-API Chat
         </h1>
         <p className={styles.subtitle}>
-          Все три значения есть на странице инстанса в{' '}
+          Данные для входа можно найти в{' '}
           <a href="https://console.green-api.com" target="_blank" rel="noreferrer">
             личном кабинете GREEN-API
-          </a>
+          </a>{' '}
+          на странице инстанса
         </p>
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>

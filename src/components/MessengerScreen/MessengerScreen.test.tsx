@@ -6,7 +6,7 @@ import { getChatHistory } from '../../api/greenApi'
 import { useChat } from '../../state/chatContext'
 import { ChatProvider } from '../../state/ChatProvider'
 import { saveChats } from '../../state/chatsStorage'
-import { saveCredentials } from '../../state/credentialsStorage'
+import { loadCredentials, saveCredentials } from '../../state/credentialsStorage'
 import { MessengerScreen } from './MessengerScreen'
 
 const credentials = {
@@ -178,5 +178,39 @@ describe('новый чат', () => {
     await user.click(openButton)
     await user.click(screen.getByRole('button', { name: 'Закрыть' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})
+
+describe('меню «⋮»', () => {
+  it('открывается по кнопке и закрывается по Esc, возвращая фокус на кнопку', async () => {
+    const user = renderMessenger()
+    const button = screen.getByRole('button', { name: 'Меню' })
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('menuitem', { name: 'Выйти' })).toHaveFocus()
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(button).toHaveFocus()
+  })
+
+  it('закрывается кликом мимо меню', async () => {
+    const user = renderMessenger()
+    await user.click(screen.getByRole('button', { name: 'Меню' }))
+
+    await user.click(screen.getByText(/Выберите чат слева/))
+
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  })
+
+  it('«Выйти» в меню выходит из аккаунта', async () => {
+    const user = renderMessenger()
+    await user.click(screen.getByRole('button', { name: 'Меню' }))
+
+    await user.click(screen.getByRole('menuitem', { name: 'Выйти' }))
+
+    expect(loadCredentials()).toBeNull()
   })
 })

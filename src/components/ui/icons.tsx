@@ -104,3 +104,14 @@ export function AlertIcon(props: IconProps) {
     </Icon>
   )
 }
+
+/** Три точки вертикально — кнопка меню, как в WhatsApp. */
+export function MoreIcon(props: IconProps) {
+  return (
+    <Icon fill="currentColor" stroke="none" {...props}>
+      <circle cx="12" cy="5" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="19" r="2" />
+    </Icon>
+  )
+}

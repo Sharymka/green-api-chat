@@ -61,7 +61,7 @@ describe('экран входа', () => {
     await fillForm(user, { ...credentials, apiUrl: 'https://7107.api.greenapi.com/' })
     await user.click(submit())
 
-    expect(await screen.findByRole('button', { name: 'Выйти' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Меню' })).toBeInTheDocument()
     // Слэш в конце адреса убран перед запросом
     expect(getStateInstanceMock).toHaveBeenCalledWith(credentials, expect.any(AbortSignal))
     expect(loadCredentials()).toEqual(credentials)
@@ -75,7 +75,7 @@ describe('экран входа', () => {
     await fillForm(user)
     await user.click(submit())
 
-    await screen.findByRole('button', { name: 'Выйти' })
+    await screen.findByRole('button', { name: 'Меню' })
     expect(localStorage.getItem('green-api-chat:chats:7107000001')).toContain('79001234567')
   })
 
@@ -125,7 +125,7 @@ describe('экран входа', () => {
     await user.click(submit())
 
     expect(await screen.findByRole('alert')).toHaveTextContent('отсканируйте QR-код')
-    expect(screen.queryByRole('button', { name: 'Выйти' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Меню' })).not.toBeInTheDocument()
   })
 
   it('пока идёт проверка, блокирует кнопку и показывает «Проверяем…»', async () => {
@@ -156,7 +156,8 @@ describe('выход', () => {
     saveCredentials(credentials)
     const user = renderApp()
 
-    await user.click(screen.getByRole('button', { name: 'Выйти' }))
+    await user.click(screen.getByRole('button', { name: 'Меню' }))
+    await user.click(screen.getByRole('menuitem', { name: 'Выйти' }))
 
     expect(screen.getByRole('heading', { name: 'Вход в GREEN-API Chat' })).toBeInTheDocument()
     expect(loadCredentials()).toBeNull()

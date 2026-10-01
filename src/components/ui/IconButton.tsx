@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 import styles from './IconButton.module.css'
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -7,6 +7,7 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Цвет иконки: обычный серый или зелёный акцент. */
   tone?: 'default' | 'accent'
   children: ReactNode
+  ref?: Ref<HTMLButtonElement>
 }
 
 export function IconButton({
@@ -14,10 +15,12 @@ export function IconButton({
   tone = 'default',
   children,
   className,
+  ref,
   ...props
 }: IconButtonProps) {
   return (
     <button
+      ref={ref}
       type="button"
       className={[styles.button, styles[tone], className].filter(Boolean).join(' ')}
       aria-label={label}
