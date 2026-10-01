@@ -30,6 +30,7 @@
   --color-badge: #25d366;
   --color-badge-text: #ffffff;
   --color-overlay: rgb(11 20 26 / 0.45);
+  --color-scrollbar: rgb(11 20 26 / 0.2);
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -72,6 +73,7 @@
     --color-badge: #00a884;
     --color-badge-text: #111b21;
     --color-overlay: rgb(0 0 0 / 0.6);
+    --color-scrollbar: rgb(255 255 255 / 0.16);
 
     --shadow-card: 0 1px 3px rgb(0 0 0 / 0.4);
     --shadow-bubble: 0 1px 0.5px rgb(0 0 0 / 0.3);
@@ -107,6 +109,34 @@ input,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+/* Тонкий полупрозрачный скроллбар, как в WhatsApp Web: виден, только когда курсор
+   над прокручиваемой областью, а в остальное время не отвлекает */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover,
+*:focus-within {
+  scrollbar-color: var(--color-scrollbar) transparent;
+}
+
+/* Safari пока не понимает scrollbar-color — для него рисуем скроллбар по-старому */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: transparent;
+  }
+
+  :hover::-webkit-scrollbar-thumb {
+    background: var(--color-scrollbar);
+  }
 }
 
 /* Обводку фокуса показываем только при работе с клавиатуры, а не при клике мышкой */
