@@ -43,13 +43,21 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  /* «Обои» переписки: бледный рисованный узор поверх мягкого градиента.
-     local — узор прокручивается вместе с сообщениями, как в WhatsApp */
+  /* «Обои» в духе Telegram: несколько размытых цветовых пятен складываются
+     в мягкий многоцветный градиент, а поверх — контуры рисунков.
+     Градиент стоит на месте (fixed), узор прокручивается вместе с сообщениями (local) */
   background:
     url('../../assets/chat-pattern-light.svg') repeat local,
-    linear-gradient(160deg, #f3efe8 0%, var(--color-chat-bg) 55%, #e8e1d6 100%) fixed;
+    radial-gradient(circle at 15% 15%, #e2efb0 0%, transparent 45%) fixed,
+    radial-gradient(circle at 85% 10%, #9fdcc0 0%, transparent 45%) fixed,
+    radial-gradient(circle at 80% 85%, #b6e3d4 0%, transparent 50%) fixed,
+    radial-gradient(circle at 10% 90%, #d6eaa3 0%, transparent 50%) fixed,
+    #c4e3b4;
   background-size:
     320px 320px,
+    100% 100%,
+    100% 100%,
+    100% 100%,
     100% 100%;
 }
 
@@ -57,9 +65,16 @@
   .messages {
     background:
       url('../../assets/chat-pattern-dark.svg') repeat local,
-      linear-gradient(160deg, #0f1b21 0%, var(--color-chat-bg) 55%, #0a1216 100%) fixed;
+      radial-gradient(circle at 15% 15%, #1f4a3c 0%, transparent 45%) fixed,
+      radial-gradient(circle at 85% 10%, #1c3a4f 0%, transparent 45%) fixed,
+      radial-gradient(circle at 80% 85%, #24414a 0%, transparent 50%) fixed,
+      radial-gradient(circle at 10% 90%, #2a4636 0%, transparent 50%) fixed,
+      #12262a;
     background-size:
       320px 320px,
+      100% 100%,
+      100% 100%,
+      100% 100%,
       100% 100%;
   }
 }
