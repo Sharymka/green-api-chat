@@ -28,9 +28,14 @@ export function MessengerScreen() {
           <IconButton label="Новый чат" tone="accent" onClick={() => setNewChatOpen(true)}>
             <PlusIcon />
           </IconButton>
-          <IconButton label="Выйти" tone="danger" onClick={() => dispatch({ type: 'loggedOut' })}>
-            <LogoutIcon />
-          </IconButton>
+          <button
+            type="button"
+            className={styles.logout}
+            onClick={() => dispatch({ type: 'loggedOut' })}
+          >
+            <LogoutIcon width={18} height={18} />
+            Выйти
+          </button>
         </header>
         <ConnectionBanner reconnecting={state.connection === 'reconnecting'} />
         <ChatList

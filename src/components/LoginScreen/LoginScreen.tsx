@@ -97,7 +97,7 @@ export function LoginScreen() {
         <p className={styles.subtitle}>
           Все три значения есть на странице инстанса в{' '}
           <a href="https://console.green-api.com" target="_blank" rel="noreferrer">
-            личного кабинета GREEN-API
+            личном кабинете GREEN-API
           </a>
         </p>
 

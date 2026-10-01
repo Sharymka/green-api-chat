@@ -41,6 +41,33 @@
   color: var(--color-text-muted);
 }
 
+/* «Выйти»: аккуратная кнопка с иконкой; при наведении мягко краснеет, чтобы было понятно, что это выход */
+.logout {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-panel);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.logout:hover {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
 .main {
   min-width: 0;
   min-height: 0;

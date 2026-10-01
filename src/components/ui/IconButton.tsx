@@ -4,8 +4,8 @@ import styles from './IconButton.module.css'
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Подпись обязательна: без неё скринридер прочитает просто «кнопка». */
   label: string
-  /** Цвет иконки: обычный серый, зелёный акцент или красный (для «опасных» действий). */
-  tone?: 'default' | 'accent' | 'danger'
+  /** Цвет иконки: обычный серый или зелёный акцент. */
+  tone?: 'default' | 'accent'
   children: ReactNode
 }
 
