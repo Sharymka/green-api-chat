@@ -20,7 +20,7 @@ describe('nextDelay', () => {
 describe('wait', () => {
   it('заканчивается по истечении времени', async () => {
     vi.useFakeTimers()
-    const done = vi.fn()
+    const done = vi.fn<() => void>()
     void wait(1000, new AbortController().signal).then(done)
 
     await vi.advanceTimersByTimeAsync(999)
