@@ -6,6 +6,7 @@
   /* Градиент для главных кнопок: от тёмно-зелёного шапки к яркому акценту и обратно */
   --gradient-accent: linear-gradient(110deg, #006b58 0%, #008069 40%, #00957a 65%, #006b58 100%);
   --color-accent-contrast: #ffffff;
+  --color-accent-soft: #d9fdd3;
   --color-header: #008069;
 
   --color-bg: #f0f2f5;
@@ -47,6 +48,7 @@
     --color-accent-hover: #06cf9c;
     --gradient-accent: linear-gradient(110deg, #00a884 0%, #06cf9c 45%, #25d366 70%, #00a884 100%);
     --color-accent-contrast: #111b21;
+    --color-accent-soft: #103529;
     --color-header: #202c33;
 
     --color-bg: #0b141a;

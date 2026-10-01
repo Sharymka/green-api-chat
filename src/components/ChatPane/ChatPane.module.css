@@ -43,7 +43,15 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  background: var(--color-chat-bg);
+  /* Свой рисованный узор поверх фона, как «обои» в WhatsApp. local — узор едет вместе с сообщениями */
+  background: url('../../assets/chat-pattern-light.svg') repeat local var(--color-chat-bg);
+  background-size: 200px 200px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .messages {
+    background-image: url('../../assets/chat-pattern-dark.svg');
+  }
 }
 
 /* Плашка по центру ленты, как системные сообщения в WhatsApp */

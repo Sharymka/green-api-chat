@@ -9,11 +9,34 @@
   border: none;
   border-radius: 50%;
   background: none;
-  color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background 0.15s;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .button:hover {
   background: var(--color-panel-active);
+}
+
+.default {
+  color: var(--color-text-secondary);
+}
+
+.accent {
+  color: var(--color-accent);
+}
+
+.accent:hover {
+  background: var(--color-accent-soft);
+}
+
+/* «Выйти»: в покое спокойный серый, при наведении — красный, чтобы было видно, что это выход */
+.danger {
+  color: var(--color-text-secondary);
+}
+
+.danger:hover {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
 }

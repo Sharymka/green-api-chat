@@ -21,10 +21,10 @@ export function MessengerScreen() {
             <span className={styles.accountLabel}>Инстанс</span>
             <span className={styles.accountId}>{state.credentials?.idInstance}</span>
           </div>
-          <IconButton label="Новый чат" onClick={() => setNewChatOpen(true)}>
+          <IconButton label="Новый чат" tone="accent" onClick={() => setNewChatOpen(true)}>
             <PlusIcon />
           </IconButton>
-          <IconButton label="Выйти" onClick={() => dispatch({ type: 'loggedOut' })}>
+          <IconButton label="Выйти" tone="danger" onClick={() => dispatch({ type: 'loggedOut' })}>
             <LogoutIcon />
           </IconButton>
         </header>

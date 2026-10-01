@@ -20,7 +20,12 @@ export function ChatPane({ chat, onBack }: ChatPaneProps) {
     <section className={styles.pane} aria-label={`Чат: ${title}`}>
       <header className={styles.header}>
         {/* «Назад» нужна только на телефоне, где список и чат не помещаются рядом */}
-        <IconButton label="Назад к списку чатов" className={styles.back} onClick={onBack}>
+        <IconButton
+          label="Назад к списку чатов"
+          tone="accent"
+          className={styles.back}
+          onClick={onBack}
+        >
           <BackIcon />
         </IconButton>
         <Avatar name={chat.name} size={40} />

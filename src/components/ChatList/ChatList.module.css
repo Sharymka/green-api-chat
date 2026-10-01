@@ -16,6 +16,8 @@
   background: var(--color-panel);
   text-align: left;
   cursor: pointer;
+  /* Подсветка при наведении появляется и гаснет плавно, а не рывком */
+  transition: background-color 0.25s ease;
 }
 
 .item:hover {
