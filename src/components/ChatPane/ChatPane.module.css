@@ -43,14 +43,24 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  /* Свой рисованный узор поверх фона, как «обои» в WhatsApp. local — узор едет вместе с сообщениями */
-  background: url('../../assets/chat-pattern-light.svg') repeat local var(--color-chat-bg);
-  background-size: 200px 200px;
+  /* «Обои» переписки: бледный рисованный узор поверх мягкого градиента.
+     local — узор прокручивается вместе с сообщениями, как в WhatsApp */
+  background:
+    url('../../assets/chat-pattern-light.svg') repeat local,
+    linear-gradient(160deg, #f3efe8 0%, var(--color-chat-bg) 55%, #e8e1d6 100%) fixed;
+  background-size:
+    320px 320px,
+    100% 100%;
 }
 
 @media (prefers-color-scheme: dark) {
   .messages {
-    background-image: url('../../assets/chat-pattern-dark.svg');
+    background:
+      url('../../assets/chat-pattern-dark.svg') repeat local,
+      linear-gradient(160deg, #0f1b21 0%, var(--color-chat-bg) 55%, #0a1216 100%) fixed;
+    background-size:
+      320px 320px,
+      100% 100%;
   }
 }
 
