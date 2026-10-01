@@ -95,7 +95,7 @@ export function LoginScreen() {
           Вход в GREEN-API Chat
         </h1>
         <p className={styles.subtitle}>
-          Введите данные инстанса из{' '}
+          Все три значения есть на странице инстанса в{' '}
           <a href="https://console.green-api.com" target="_blank" rel="noreferrer">
             личного кабинета GREEN-API
           </a>
@@ -104,7 +104,8 @@ export function LoginScreen() {
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <TextField
             ref={idInstanceRef}
-            label="idInstance"
+            label="ID инстанса"
+            hint="idInstance в личном кабинете"
             name="idInstance"
             inputMode="numeric"
             autoComplete="off"
@@ -116,7 +117,8 @@ export function LoginScreen() {
           />
           <TextField
             ref={tokenRef}
-            label="apiTokenInstance"
+            label="API-токен"
+            hint="apiTokenInstance в личном кабинете"
             name="apiTokenInstance"
             type={showToken ? 'text' : 'password'}
             autoComplete="off"
@@ -139,13 +141,13 @@ export function LoginScreen() {
           />
           <TextField
             ref={apiUrlRef}
-            label="apiUrl"
+            label="Адрес API"
             name="apiUrl"
             type="url"
             autoComplete="off"
             spellCheck={false}
             placeholder="https://7107.api.greenapi.com"
-            hint="Скопируйте из личного кабинета, со страницы инстанса"
+            hint="apiUrl в личном кабинете"
             value={values.apiUrl}
             onChange={(e) => setField('apiUrl')(e.target.value)}
             error={errors.apiUrl}

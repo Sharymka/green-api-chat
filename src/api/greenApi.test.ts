@@ -204,7 +204,7 @@ describe('isRetryable и getErrorMessage', () => {
 
   it('возвращает понятный пользователю текст ошибки', () => {
     expect(getErrorMessage(new ApiError('unauthorized', 401))).toBe(
-      'Неверный idInstance или apiTokenInstance',
+      'Неверный ID инстанса или API-токен',
     )
     expect(getErrorMessage(new Error('boom'))).toBe('Что-то пошло не так')
   })

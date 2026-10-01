@@ -3,6 +3,17 @@
   "plugins": ["react", "typescript", "oxc", "jsx-a11y", "vitest"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "vitest/expect-expect": [
+      "warn",
+      {
+        "assertFunctionNames": ["expect", "expectNoA11yViolations"]
+      }
+    ]
   }
 }

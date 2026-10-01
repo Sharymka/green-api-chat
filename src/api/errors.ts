@@ -45,7 +45,7 @@ export function isRetryable(error: unknown): boolean {
 }
 
 const MESSAGES: Record<ApiErrorKind, string> = {
-  unauthorized: 'Неверный idInstance или apiTokenInstance',
+  unauthorized: 'Неверный ID инстанса или API-токен',
   badRequest: 'Запрос отклонён сервисом. Проверьте введённые данные',
   quotaExceeded: 'Превышен лимит тарифа GREEN-API',
   rateLimit: 'Слишком много запросов, попробуйте чуть позже',

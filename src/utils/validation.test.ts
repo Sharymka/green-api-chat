@@ -18,7 +18,7 @@ describe('validateApiUrl', () => {
   })
 
   it.each([
-    ['пустой адрес', '', 'Укажите apiUrl'],
+    ['пустой адрес', '', 'Укажите адрес API'],
     ['не адрес', 'greenapi', 'Некорректный адрес'],
     ['http вместо https', 'http://7107.api.greenapi.com', 'Адрес должен начинаться с https://'],
     [
@@ -60,8 +60,8 @@ describe('validateCredentials', () => {
   it('сообщает об ошибке в каждом неверном поле', () => {
     expect(validateCredentials({ apiUrl: '', idInstance: '71a', apiTokenInstance: 'a b' })).toEqual(
       {
-        apiUrl: 'Укажите apiUrl',
-        idInstance: 'idInstance состоит только из цифр',
+        apiUrl: 'Укажите адрес API',
+        idInstance: 'ID инстанса состоит только из цифр',
         apiTokenInstance: 'Токен не должен содержать пробелов',
       },
     )
@@ -73,8 +73,8 @@ describe('validateCredentials', () => {
       idInstance: ' ',
       apiTokenInstance: '',
     })
-    expect(errors.idInstance).toBe('Укажите idInstance')
-    expect(errors.apiTokenInstance).toBe('Укажите apiTokenInstance')
+    expect(errors.idInstance).toBe('Укажите ID инстанса')
+    expect(errors.apiTokenInstance).toBe('Укажите API-токен')
   })
 
   it('убирает лишние пробелы и слэш в конце', () => {

@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { silentReceive } from './test/api'
 import { ApiError } from './api/errors'
 import { getStateInstance } from './api/greenApi'
 import App from './App'
@@ -14,7 +13,7 @@ vi.mock('./api/greenApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./api/greenApi')>()
   return {
     ...actual,
-    receiveNotification: silentReceive,
+    receiveNotification: (await import('./test/api')).silentReceive,
     getStateInstance: vi.fn<typeof actual.getStateInstance>(),
   }
 })
@@ -36,11 +35,11 @@ function renderApp() {
 }
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>, values = credentials) {
-  if (values.idInstance) await user.type(screen.getByLabelText('idInstance'), values.idInstance)
+  if (values.idInstance) await user.type(screen.getByLabelText('ID инстанса'), values.idInstance)
   if (values.apiTokenInstance) {
-    await user.type(screen.getByLabelText('apiTokenInstance'), values.apiTokenInstance)
+    await user.type(screen.getByLabelText('API-токен'), values.apiTokenInstance)
   }
-  if (values.apiUrl) await user.type(screen.getByLabelText('apiUrl'), values.apiUrl)
+  if (values.apiUrl) await user.type(screen.getByLabelText('Адрес API'), values.apiUrl)
 }
 
 const submit = () => screen.getByRole('button', { name: 'Войти' })
@@ -83,28 +82,28 @@ describe('экран входа', () => {
   it('показывает ошибки под полями и не отправляет запрос', async () => {
     const user = renderApp()
 
-    await user.type(screen.getByLabelText('idInstance'), '71a')
-    await user.type(screen.getByLabelText('apiUrl'), 'https://evil.example.com')
+    await user.type(screen.getByLabelText('ID инстанса'), '71a')
+    await user.type(screen.getByLabelText('Адрес API'), 'https://evil.example.com')
     await user.click(submit())
 
-    expect(screen.getByText('idInstance состоит только из цифр')).toBeInTheDocument()
-    expect(screen.getByText('Укажите apiTokenInstance')).toBeInTheDocument()
+    expect(screen.getByText('ID инстанса состоит только из цифр')).toBeInTheDocument()
+    expect(screen.getByText('Укажите API-токен')).toBeInTheDocument()
     expect(
       screen.getByText('Разрешены только адреса GREEN-API (*.api.greenapi.com)'),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText('idInstance')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('ID инстанса')).toHaveAttribute('aria-invalid', 'true')
     // Фокус переходит на первое поле с ошибкой
-    expect(screen.getByLabelText('idInstance')).toHaveFocus()
+    expect(screen.getByLabelText('ID инстанса')).toHaveFocus()
     expect(getStateInstanceMock).not.toHaveBeenCalled()
   })
 
   it('убирает ошибку поля, когда его начинают исправлять', async () => {
     const user = renderApp()
     await user.click(submit())
-    expect(screen.getByText('Укажите idInstance')).toBeInTheDocument()
+    expect(screen.getByText('Укажите ID инстанса')).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText('idInstance'), '7')
-    expect(screen.queryByText('Укажите idInstance')).not.toBeInTheDocument()
+    await user.type(screen.getByLabelText('ID инстанса'), '7')
+    expect(screen.queryByText('Укажите ID инстанса')).not.toBeInTheDocument()
   })
 
   it('сообщает о неверном токене', async () => {
@@ -114,9 +113,7 @@ describe('экран входа', () => {
     await fillForm(user)
     await user.click(submit())
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Неверный idInstance или apiTokenInstance',
-    )
+    expect(await screen.findByRole('alert')).toHaveTextContent('Неверный ID инстанса или API-токен')
     expect(submit()).toBeEnabled()
   })
 
@@ -143,7 +140,7 @@ describe('экран входа', () => {
 
   it('показывает и скрывает токен', async () => {
     const user = renderApp()
-    const token = screen.getByLabelText('apiTokenInstance')
+    const token = screen.getByLabelText('API-токен')
     expect(token).toHaveAttribute('type', 'password')
 
     await user.click(screen.getByRole('button', { name: 'Показать токен' }))

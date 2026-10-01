@@ -13,7 +13,7 @@ export function normalizeApiUrl(input: string): string {
 
 export function validateApiUrl(input: string): string | undefined {
   const value = normalizeApiUrl(input)
-  if (!value) return 'Укажите apiUrl'
+  if (!value) return 'Укажите адрес API'
 
   let url: URL
   try {
@@ -36,11 +36,11 @@ export function validateCredentials(values: Credentials): CredentialsErrors {
   const errors: CredentialsErrors = {}
 
   const idInstance = values.idInstance.trim()
-  if (!idInstance) errors.idInstance = 'Укажите idInstance'
-  else if (!/^\d+$/.test(idInstance)) errors.idInstance = 'idInstance состоит только из цифр'
+  if (!idInstance) errors.idInstance = 'Укажите ID инстанса'
+  else if (!/^\d+$/.test(idInstance)) errors.idInstance = 'ID инстанса состоит только из цифр'
 
   const token = values.apiTokenInstance.trim()
-  if (!token) errors.apiTokenInstance = 'Укажите apiTokenInstance'
+  if (!token) errors.apiTokenInstance = 'Укажите API-токен'
   else if (/\s/.test(token)) errors.apiTokenInstance = 'Токен не должен содержать пробелов'
 
   const apiUrlError = validateApiUrl(values.apiUrl)
