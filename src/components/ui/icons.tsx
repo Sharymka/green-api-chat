@@ -70,3 +70,37 @@ export function ChatIcon(props: IconProps) {
     </Icon>
   )
 }
+
+export function SendIcon(props: IconProps) {
+  return (
+    <Icon fill="currentColor" stroke="none" {...props}>
+      <path d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2Z" />
+    </Icon>
+  )
+}
+
+export function ClockIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth="2.2" {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </Icon>
+  )
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth="2.4" {...props}>
+      <path d="m4 12.5 5 5L20 6.5" />
+    </Icon>
+  )
+}
+
+export function AlertIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth="2.2" {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7.5v5.5M12 16.5h.01" />
+    </Icon>
+  )
+}

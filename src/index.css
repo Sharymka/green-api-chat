@@ -21,13 +21,12 @@
   --color-text-muted: #667781;
 
   --color-bubble-in: #ffffff;
-  --color-bubble-out: #d9fdd3;
+  --color-bubble-out: #e7fcd9;
+  --color-check: #00a884;
   --color-danger: #d32f2f;
   --color-danger-bg: #fdecea;
   --color-skeleton: #e1e4e6;
   --color-focus: #027eb5;
-  --color-avatar-bg: #b4bfc5;
-  --color-avatar-text: #ffffff;
   --color-badge: #25d366;
   --color-badge-text: #ffffff;
   --color-overlay: rgb(11 20 26 / 0.45);
@@ -36,6 +35,7 @@
   --radius-md: 6px;
   --radius-lg: 8px;
   --shadow-card: 0 1px 3px rgb(11 20 26 / 0.13);
+  --shadow-bubble: 0 1px 0.5px rgb(11 20 26 / 0.13);
 
   --font: 'Segoe UI', Helvetica, Arial, system-ui, sans-serif;
 
@@ -64,17 +64,17 @@
 
     --color-bubble-in: #202c33;
     --color-bubble-out: #005c4b;
+    --color-check: #53bdeb;
     --color-danger: #f15c6d;
     --color-danger-bg: #3b1f24;
     --color-skeleton: #2a3942;
     --color-focus: #53bdeb;
-    --color-avatar-bg: #6a7175;
-    --color-avatar-text: #cfd4d6;
     --color-badge: #00a884;
     --color-badge-text: #111b21;
     --color-overlay: rgb(0 0 0 / 0.6);
 
     --shadow-card: 0 1px 3px rgb(0 0 0 / 0.4);
+    --shadow-bubble: 0 1px 0.5px rgb(0 0 0 / 0.3);
 
     color-scheme: dark;
   }

@@ -1,6 +1,10 @@
+import { useChatHistory } from '../../hooks/useChatHistory'
+import { useSendMessage } from '../../hooks/useSendMessage'
 import type { Chat } from '../../state/chatReducer'
 import { chatTitle } from '../../utils/chat'
 import { formatPhone, phoneFromChatId } from '../../utils/phone'
+import { Composer } from '../Composer/Composer'
+import { MessageList } from '../MessageList/MessageList'
 import { Avatar } from '../ui/Avatar'
 import { BackIcon } from '../ui/icons'
 import { IconButton } from '../ui/IconButton'
@@ -15,6 +19,8 @@ interface ChatPaneProps {
 export function ChatPane({ chat, onBack }: ChatPaneProps) {
   const title = chatTitle(chat)
   const phone = formatPhone(phoneFromChatId(chat.chatId))
+  const { send, retry } = useSendMessage(chat.chatId)
+  const history = useChatHistory(chat)
 
   return (
     <section className={styles.pane} aria-label={`Чат: ${title}`}>
@@ -28,20 +34,21 @@ export function ChatPane({ chat, onBack }: ChatPaneProps) {
         >
           <BackIcon />
         </IconButton>
-        <Avatar name={chat.name} size={40} />
+        <Avatar seed={chat.chatId} name={chat.name} size={40} />
         <div className={styles.titles}>
           <h2 className={styles.title}>{title}</h2>
           {chat.name && <p className={styles.subtitle}>{phone}</p>}
         </div>
       </header>
-      <div className={styles.messages}>
-        {chat.messages.length === 0 && chat.history !== 'loading' && (
-          <div className={styles.empty}>
-            <p className={styles.emptyTitle}>Сообщений пока нет</p>
-            <p>Напишите первым — сообщение придёт в WhatsApp на номер {phone}</p>
-          </div>
-        )}
+      <div className={styles.wallpaper}>
+        <MessageList
+          chat={chat}
+          phone={phone}
+          onRetry={(message) => retry(message.id, message.text)}
+          onRetryHistory={history.retry}
+        />
       </div>
+      <Composer key={chat.chatId} onSend={send} />
     </section>
   )
 }

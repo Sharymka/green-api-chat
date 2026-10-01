@@ -1,0 +1,89 @@
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 16px 10px;
+  background: var(--color-bg);
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-panel);
+  line-height: 20px;
+  resize: none;
+  outline: none;
+}
+
+.input:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.input[aria-invalid='true'] {
+  box-shadow: 0 0 0 2px var(--color-danger);
+}
+
+.hint {
+  margin: 4px 4px 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+.hint[data-error] {
+  color: var(--color-danger);
+  text-align: left;
+}
+
+/* Круглая кнопка отправки с тем же градиентом, что и «Войти» */
+.send {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  background-size: 200% 100%;
+  color: var(--color-accent-contrast);
+  cursor: pointer;
+  transition:
+    background-position 0.6s ease,
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+
+.send:hover:not(:disabled) {
+  background-position: 100% 50%;
+}
+
+.send:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.send:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .send {
+    transition: opacity 0.2s ease;
+  }
+}
+
+@media (max-width: 767px) {
+  .composer {
+    padding-inline: 8px;
+  }
+}

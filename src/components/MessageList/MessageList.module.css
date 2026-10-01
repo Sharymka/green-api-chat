@@ -1,0 +1,209 @@
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+  padding: 12px 6% 8px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Разделитель дня — плашка по центру */
+.day {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 8px;
+}
+
+.day span {
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bubble-in);
+  box-shadow: var(--shadow-bubble);
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+}
+
+.row {
+  display: flex;
+  margin-top: 2px;
+}
+
+.row[data-first] {
+  margin-top: 10px;
+}
+
+.row[data-direction='out'] {
+  justify-content: flex-end;
+}
+
+.bubble {
+  position: relative;
+  max-width: min(75%, 560px);
+  padding: 6px 8px 8px 10px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bubble-in);
+  box-shadow: var(--shadow-bubble);
+  color: var(--color-text);
+}
+
+.row[data-direction='out'] .bubble {
+  background: var(--color-bubble-out);
+}
+
+/* «Хвостик» у первого пузыря в серии: срезаем один угол */
+.row[data-first][data-direction='in'] .bubble {
+  border-top-left-radius: 0;
+}
+
+.row[data-first][data-direction='out'] .bubble {
+  border-top-right-radius: 0;
+}
+
+.bubble[data-failed] {
+  outline: 1px solid var(--color-danger);
+}
+
+.text {
+  display: inline;
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* Время и статус прижаты к правому нижнему углу пузыря, как в WhatsApp */
+.meta {
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin: 6px 0 -4px 10px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.row[data-direction='out'] .status {
+  color: var(--color-check);
+}
+
+.row[data-direction='out'] .failed {
+  color: var(--color-danger);
+}
+
+.retry {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-danger);
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Плашки «Сообщений пока нет» и «Не удалось загрузить» */
+.notice {
+  align-self: center;
+  max-width: 360px;
+  margin: 12px auto;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-bubble-in);
+  box-shadow: var(--shadow-bubble);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice .noticeTitle {
+  margin-bottom: 4px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.noticeButton {
+  margin-top: 8px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Скелетон: серые «пузыри» с бегущим бликом, пока грузится история */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.skeletonBubble {
+  height: 36px;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.45) 50%, transparent 100%) no-repeat,
+    var(--color-skeleton);
+  background-size:
+    40% 100%,
+    100% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonBubble[data-side='out'] {
+  align-self: flex-end;
+}
+
+@keyframes shimmer {
+  from {
+    background-position:
+      -40% 0,
+      0 0;
+  }
+
+  to {
+    background-position:
+      140% 0,
+      0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonBubble {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .inner {
+    padding-inline: 10px;
+  }
+
+  .bubble {
+    max-width: 85%;
+  }
+}

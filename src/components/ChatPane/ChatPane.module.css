@@ -39,10 +39,11 @@
   color: var(--color-text-muted);
 }
 
-.messages {
+.wallpaper {
+  display: flex;
   flex: 1;
+  flex-direction: column;
   min-height: 0;
-  overflow-y: auto;
   /* «Обои» в духе Telegram: несколько размытых цветовых пятен складываются
      в мягкий многоцветный градиент, а поверх — контуры рисунков.
      Градиент стоит на месте (fixed), узор прокручивается вместе с сообщениями (local) */
@@ -62,7 +63,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .messages {
+  .wallpaper {
     background:
       url('../../assets/chat-pattern-dark.svg') repeat local,
       radial-gradient(circle at 15% 15%, #1f4a3c 0%, transparent 45%) fixed,
@@ -77,29 +78,6 @@
       100% 100%,
       100% 100%;
   }
-}
-
-/* Плашка по центру ленты, как системные сообщения в WhatsApp */
-.empty {
-  max-width: 360px;
-  margin: 24px auto;
-  padding: 10px 16px;
-  border-radius: var(--radius-md);
-  background: var(--color-panel);
-  box-shadow: var(--shadow-card);
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  text-align: center;
-}
-
-.empty p {
-  margin: 0;
-}
-
-.empty .emptyTitle {
-  margin-bottom: 4px;
-  color: var(--color-text);
-  font-weight: 500;
 }
 
 @media (max-width: 767px) {

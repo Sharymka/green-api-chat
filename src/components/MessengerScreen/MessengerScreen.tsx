@@ -18,8 +18,8 @@ export function MessengerScreen() {
       <aside className={styles.sidebar} aria-label="Чаты">
         <header className={styles.header}>
           <div className={styles.account}>
-            <span className={styles.accountLabel}>Инстанс</span>
-            <span className={styles.accountId}>{state.credentials?.idInstance}</span>
+            <span className={styles.accountName}>Мой WhatsApp</span>
+            <span className={styles.accountId}>ID {state.credentials?.idInstance}</span>
           </div>
           <IconButton label="Новый чат" tone="accent" onClick={() => setNewChatOpen(true)}>
             <PlusIcon />

@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useEffect } from 'react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { getChatHistory } from '../../api/greenApi'
 import { useChat } from '../../state/chatContext'
 import { ChatProvider } from '../../state/ChatProvider'
 import { saveChats } from '../../state/chatsStorage'
@@ -37,6 +38,16 @@ function renderMessenger(chats: { chatId: string; name?: string }[] = []) {
   )
   return userEvent.setup()
 }
+
+// История с сервера в этих тестах пустая: проверяем раскладку и список чатов
+vi.mock('../../api/greenApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../api/greenApi')>()
+  return { ...actual, getChatHistory: vi.fn<typeof actual.getChatHistory>() }
+})
+
+beforeEach(() => {
+  vi.mocked(getChatHistory).mockResolvedValue([])
+})
 
 const chatList = () => screen.getByRole('complementary', { name: 'Чаты' })
 
@@ -95,7 +106,7 @@ describe('список чатов', () => {
 
     await user.click(within(chatList()).getByRole('button', { name: /Иван/ }))
 
-    expect(screen.getByText('Сообщений пока нет')).toBeInTheDocument()
+    expect(await screen.findByText('Сообщений пока нет')).toBeInTheDocument()
     expect(screen.getByText(/придёт в WhatsApp на номер \+7 900 123-45-67/)).toBeInTheDocument()
   })
 

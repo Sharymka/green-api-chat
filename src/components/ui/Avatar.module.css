@@ -5,7 +5,7 @@
   justify-content: center;
   overflow: hidden;
   border-radius: 50%;
-  background: var(--color-avatar-bg);
-  color: var(--color-avatar-text);
-  font-weight: 500;
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.12);
 }

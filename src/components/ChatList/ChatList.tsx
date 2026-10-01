@@ -35,7 +35,7 @@ export function ChatList({ chats, activeChatId, onSelect }: ChatListProps) {
               onClick={() => onSelect(chat.chatId)}
               aria-current={active ? 'true' : undefined}
             >
-              <Avatar name={chat.name} />
+              <Avatar seed={chat.chatId} name={chat.name} />
               <span className={styles.body}>
                 <span className={styles.row}>
                   <span className={styles.title}>{title}</span>
