@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { silentReceive } from './test/api'
 import { ApiError } from './api/errors'
 import { getStateInstance } from './api/greenApi'
 import App from './App'
@@ -11,7 +12,11 @@ import { loadCredentials, saveCredentials } from './state/credentialsStorage'
 // Настоящие запросы в тестах не отправляем: подменяем только проверку инстанса
 vi.mock('./api/greenApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./api/greenApi')>()
-  return { ...actual, getStateInstance: vi.fn<typeof actual.getStateInstance>() }
+  return {
+    ...actual,
+    receiveNotification: silentReceive,
+    getStateInstance: vi.fn<typeof actual.getStateInstance>(),
+  }
 })
 const getStateInstanceMock = vi.mocked(getStateInstance)
 

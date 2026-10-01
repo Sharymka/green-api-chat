@@ -25,6 +25,8 @@
   --color-check: #00a884;
   --color-danger: #d32f2f;
   --color-danger-bg: #fdecea;
+  --color-warning-bg: #fff4ce;
+  --color-warning-text: #5c4a00;
   --color-skeleton: #e1e4e6;
   --color-focus: #027eb5;
   --color-badge: #25d366;
@@ -68,6 +70,8 @@
     --color-check: #53bdeb;
     --color-danger: #f15c6d;
     --color-danger-bg: #3b1f24;
+    --color-warning-bg: #3d3416;
+    --color-warning-text: #f5e3a3;
     --color-skeleton: #2a3942;
     --color-focus: #53bdeb;
     --color-badge: #00a884;

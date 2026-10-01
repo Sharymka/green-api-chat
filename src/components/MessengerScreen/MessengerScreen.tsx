@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNotifications } from '../../hooks/useNotifications'
 import { useChat } from '../../state/chatContext'
 import { ChatList } from '../ChatList/ChatList'
+import { ConnectionBanner } from '../ConnectionBanner/ConnectionBanner'
 import { ChatPane } from '../ChatPane/ChatPane'
 import { NewChatDialog } from '../NewChatDialog/NewChatDialog'
 import { ChatIcon, LogoutIcon, PlusIcon } from '../ui/icons'
@@ -10,6 +12,8 @@ import styles from './MessengerScreen.module.css'
 export function MessengerScreen() {
   const { state, dispatch } = useChat()
   const [newChatOpen, setNewChatOpen] = useState(false)
+  // Пока открыт мессенджер, в фоне работает цикл получения входящих сообщений
+  useNotifications()
   const activeChat = state.chats.find((c) => c.chatId === state.activeChatId)
 
   return (
@@ -28,6 +32,7 @@ export function MessengerScreen() {
             <LogoutIcon />
           </IconButton>
         </header>
+        <ConnectionBanner reconnecting={state.connection === 'reconnecting'} />
         <ChatList
           chats={state.chats}
           activeChatId={state.activeChatId}

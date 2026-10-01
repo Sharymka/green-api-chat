@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { silentReceive } from '../../test/api'
 import { ApiError } from '../../api/errors'
 import { getChatHistory, sendMessage } from '../../api/greenApi'
 import { ChatProvider } from '../../state/ChatProvider'
@@ -12,6 +13,7 @@ vi.mock('../../api/greenApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../api/greenApi')>()
   return {
     ...actual,
+    receiveNotification: silentReceive,
     sendMessage: vi.fn<typeof actual.sendMessage>(),
     getChatHistory: vi.fn<typeof actual.getChatHistory>(),
   }
