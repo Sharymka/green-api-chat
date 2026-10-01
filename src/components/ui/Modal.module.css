@@ -1,0 +1,32 @@
+.dialog {
+  width: calc(100% - 32px);
+  max-width: 400px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-panel);
+  color: var(--color-text);
+  box-shadow: 0 17px 50px rgb(11 20 26 / 0.19);
+}
+
+.dialog::backdrop {
+  background: var(--color-overlay);
+}
+
+/* Отступы внутри отдельного блока, чтобы клик по полям окна не считался «кликом мимо» */
+.content {
+  padding: 20px 24px 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 500;
+}

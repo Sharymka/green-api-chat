@@ -1,0 +1,27 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.submit {
+  padding: 11px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--gradient-accent);
+  background-size: 200% 100%;
+  color: var(--color-accent-contrast);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-position 0.6s ease;
+}
+
+.submit:hover {
+  background-position: 100% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit {
+    transition: none;
+  }
+}

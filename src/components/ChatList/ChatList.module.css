@@ -1,0 +1,92 @@
+.list {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0 0 0 12px;
+  border: none;
+  background: var(--color-panel);
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: var(--color-panel-hover);
+}
+
+.item[aria-current='true'] {
+  background: var(--color-panel-active);
+}
+
+/* Разделитель между чатами начинается после аватарки, как в WhatsApp */
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 13px 15px 13px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title,
+.preview {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  font-size: 17px;
+}
+
+.preview {
+  min-height: 20px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.time {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.time[data-unread] {
+  color: var(--color-badge);
+}
+
+.badge {
+  flex-shrink: 0;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--color-badge);
+  color: var(--color-badge-text);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.empty {
+  margin: 0;
+  padding: 32px 24px;
+  color: var(--color-text-muted);
+  text-align: center;
+}

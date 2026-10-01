@@ -25,6 +25,11 @@
   --color-danger-bg: #fdecea;
   --color-skeleton: #e1e4e6;
   --color-focus: #027eb5;
+  --color-avatar-bg: #b4bfc5;
+  --color-avatar-text: #ffffff;
+  --color-badge: #25d366;
+  --color-badge-text: #ffffff;
+  --color-overlay: rgb(11 20 26 / 0.45);
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -61,6 +66,11 @@
     --color-danger-bg: #3b1f24;
     --color-skeleton: #2a3942;
     --color-focus: #53bdeb;
+    --color-avatar-bg: #6a7175;
+    --color-avatar-text: #cfd4d6;
+    --color-badge: #00a884;
+    --color-badge-text: #111b21;
+    --color-overlay: rgb(0 0 0 / 0.6);
 
     --shadow-card: 0 1px 3px rgb(0 0 0 / 0.4);
 

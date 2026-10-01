@@ -1,55 +1,91 @@
 .layout {
   display: grid;
-  grid-template-columns: minmax(300px, 30%) 1fr;
+  grid-template-columns: minmax(320px, 30%) 1fr;
   height: 100%;
+  overflow: hidden;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border-right: 1px solid var(--color-border);
+  min-height: 0;
   background: var(--color-panel);
 }
 
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 4px;
   min-height: 60px;
-  padding: 10px 16px;
+  padding: 10px 12px 10px 16px;
   background: var(--color-bg);
 }
 
-.instance {
+.account {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.accountLabel {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.accountId {
   overflow: hidden;
-  color: var(--color-text-secondary);
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.logout {
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-panel);
-  cursor: pointer;
-}
-
-.logout:hover {
-  background: var(--color-panel-hover);
-}
-
 .main {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-width: 0;
+  min-height: 0;
   background: var(--color-bg);
 }
 
 .placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  border-left: 1px solid var(--color-border);
+  border-bottom: 6px solid var(--color-accent);
   color: var(--color-text-muted);
+  text-align: center;
+}
+
+.placeholderIcon {
+  color: var(--color-accent);
+}
+
+.placeholderTitle {
+  margin: 20px 0 8px;
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--color-text);
+}
+
+/* Телефон: одна колонка. Без открытого чата — список, с открытым — переписка */
+@media (max-width: 767px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .main {
+    display: none;
+  }
+
+  .layout[data-chat-open] .sidebar {
+    display: none;
+  }
+
+  .layout[data-chat-open] .main {
+    display: block;
+  }
 }
