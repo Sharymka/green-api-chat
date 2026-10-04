@@ -90,12 +90,27 @@ describe('цикл получения сообщений', () => {
     expect(result.current.state.chats[0]?.messages.map((m) => m.text)).toEqual(['текст IN-1'])
   })
 
-  it('после пустого ответа сразу спрашивает снова', async () => {
+  it('если сервер мгновенно ответил «пусто», спрашивает снова не раньше чем через секунду', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
     serverReplies([null, null, textNotification(1, 'IN-1')])
     const { result } = renderLoop()
 
+    await waitFor(() => expect(receiveMock).toHaveBeenCalledTimes(1))
+    await act(() => vi.advanceTimersByTimeAsync(500))
+    expect(receiveMock).toHaveBeenCalledTimes(1)
+
+    await act(() => vi.advanceTimersByTimeAsync(500))
+    expect(receiveMock).toHaveBeenCalledTimes(2)
+
+    await act(() => vi.advanceTimersByTimeAsync(1000))
     await waitFor(() => expect(result.current.state.chats[0]?.messages).toHaveLength(1))
-    expect(receiveMock).toHaveBeenCalledTimes(4)
+  })
+
+  it('после уведомления спрашивает следующее сразу, без паузы', async () => {
+    serverReplies([textNotification(1, 'IN-1'), textNotification(2, 'IN-2')])
+    const { result } = renderLoop()
+
+    await waitFor(() => expect(result.current.state.chats[0]?.messages).toHaveLength(2))
   })
 
   it('удаляет и ненужные уведомления: статусы и сообщения от незнакомых номеров', async () => {

@@ -7,6 +7,11 @@ import { nextDelay, wait } from '../utils/wait'
 
 /** Сколько секунд сервер держит запрос, ожидая новое уведомление. */
 const RECEIVE_TIMEOUT_SEC = 20
+/**
+ * Минимальный промежуток между пустыми запросами. Обычно сервер сам держит запрос до 20 секунд,
+ * но если он ответит «новых нет» сразу, без паузы цикл засыпал бы сервер запросами.
+ */
+const MIN_EMPTY_POLL_INTERVAL_MS = 1000
 
 /**
  * Фоновый цикл получения входящих сообщений (HTTP API GREEN-API):
@@ -36,10 +41,18 @@ export function useNotifications() {
 
       while (!signal.aborted) {
         try {
+          const startedAt = Date.now()
           const notification = await receiveNotification(creds, RECEIVE_TIMEOUT_SEC, signal)
           dispatch({ type: 'connectionChanged', connection: 'online' })
           delay = null
-          if (!notification) continue // за 20 секунд ничего не пришло — спрашиваем снова
+          if (!notification) {
+            // Новых уведомлений нет — спрашиваем снова, но не чаще раза в секунду
+            const elapsed = Date.now() - startedAt
+            if (elapsed < MIN_EMPTY_POLL_INTERVAL_MS) {
+              await wait(MIN_EMPTY_POLL_INTERVAL_MS - elapsed, signal)
+            }
+            continue
+          }
 
           const message = parseIncomingMessage(notification.body)
           if (message) dispatch({ type: 'messageReceived', message })
