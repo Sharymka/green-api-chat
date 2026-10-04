@@ -2,7 +2,13 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import userEvent from '@testing-library/user-event'
 import { useEffect } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getChatHistory, getSettings, setSettings } from '../../api/greenApi'
+import {
+  getChatHistory,
+  getSettings,
+  lastIncomingMessages,
+  lastOutgoingMessages,
+  setSettings,
+} from '../../api/greenApi'
 import { useChat } from '../../state/chatContext'
 import { ChatProvider } from '../../state/ChatProvider'
 import { saveChats } from '../../state/chatsStorage'
@@ -48,6 +54,8 @@ vi.mock('../../api/greenApi', async (importOriginal) => {
     getChatHistory: vi.fn<typeof actual.getChatHistory>(),
     getSettings: vi.fn<typeof actual.getSettings>(),
     setSettings: vi.fn<typeof actual.setSettings>(),
+    lastIncomingMessages: vi.fn<typeof actual.lastIncomingMessages>(),
+    lastOutgoingMessages: vi.fn<typeof actual.lastOutgoingMessages>(),
   }
 })
 
@@ -57,6 +65,8 @@ beforeEach(() => {
   vi.mocked(getChatHistory).mockResolvedValue([])
   vi.mocked(getSettings).mockResolvedValue(GOOD_SETTINGS)
   vi.mocked(setSettings).mockReset()
+  vi.mocked(lastIncomingMessages).mockResolvedValue([])
+  vi.mocked(lastOutgoingMessages).mockResolvedValue([])
 })
 
 const chatList = () => screen.getByRole('complementary', { name: 'Чаты' })
@@ -269,5 +279,35 @@ describe('проверка настроек инстанса', () => {
     await user.click(await screen.findByRole('button', { name: 'Скрыть предупреждение' }))
 
     expect(screen.queryByText('Проверьте настройки инстанса')).not.toBeInTheDocument()
+  })
+})
+
+describe('недавние чаты', () => {
+  it('на новом компьютере показывает чаты из журнала GREEN-API', async () => {
+    vi.mocked(lastIncomingMessages).mockResolvedValue([
+      {
+        type: 'incoming',
+        idMessage: 'IN-1',
+        timestamp: 1_700_000_000,
+        typeMessage: 'textMessage',
+        chatId: IVAN,
+        senderName: 'Серёжа',
+        textMessage: 'Привет!',
+      },
+    ])
+    renderMessenger()
+
+    const item = await within(chatList()).findByRole('button', { name: /Серёжа/ })
+    expect(item).toHaveTextContent('Привет!')
+    expect(lastIncomingMessages).toHaveBeenCalledWith(credentials, 10080, expect.any(AbortSignal))
+  })
+
+  it('если журнал недоступен — работает со списком из браузера', async () => {
+    vi.mocked(lastIncomingMessages).mockRejectedValue(new Error('network'))
+    vi.mocked(lastOutgoingMessages).mockRejectedValue(new Error('network'))
+    renderMessenger([{ chatId: IVAN, name: 'Иван' }])
+
+    await waitFor(() => expect(lastOutgoingMessages).toHaveBeenCalled())
+    expect(within(chatList()).getByRole('button', { name: /Иван/ })).toBeInTheDocument()
   })
 })

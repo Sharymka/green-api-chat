@@ -1,6 +1,7 @@
 import type { Credentials } from '../api/greenApi'
 import { mergeMessages } from '../utils/history'
 import type { IncomingMessage } from '../utils/notifications'
+import type { RecentChat } from '../utils/recentChats'
 import type { SavedChat } from './chatsStorage'
 
 export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
@@ -69,6 +70,7 @@ export type ChatAction =
   | { type: 'messageRetried'; chatId: string; id: string }
   | { type: 'messageReceived'; message: IncomingMessage }
   | { type: 'messageStatusUpdated'; chatId: string; idMessage: string; status: DeliveryStatus }
+  | { type: 'recentChatsLoaded'; chats: RecentChat[] }
   | { type: 'historyRequested'; chatId: string }
   | { type: 'historyLoaded'; chatId: string; messages: Message[]; name?: string }
   | { type: 'historyFailed'; chatId: string }
@@ -220,6 +222,29 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
         }
       })
       return chats === state.chats ? state : { ...state, chats }
+    }
+
+    case 'recentChatsLoaded': {
+      // Склеиваем недавние чаты из журнала GREEN-API с тем, что уже есть:
+      // новые чаты добавляем, у знакомых дополняем сообщения (повторы отсекаются по idMessage)
+      const merged = new Map(state.chats.map((chat) => [chat.chatId, chat]))
+      for (const recent of action.chats) {
+        const existing = merged.get(recent.chatId)
+        merged.set(
+          recent.chatId,
+          existing
+            ? {
+                ...existing,
+                name: existing.name ?? recent.name,
+                messages: mergeMessages(existing.messages, recent.messages),
+              }
+            : { ...newChat(recent), messages: recent.messages },
+        )
+      }
+      // Сверху — чат с самым свежим сообщением; чаты без сообщений остаются внизу в прежнем порядке
+      const lastTime = (chat: Chat) => chat.messages.at(-1)?.timestamp ?? 0
+      const chats = [...merged.values()].sort((a, b) => lastTime(b) - lastTime(a))
+      return { ...state, chats }
     }
 
     case 'historyRequested':

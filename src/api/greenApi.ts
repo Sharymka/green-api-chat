@@ -196,3 +196,37 @@ export async function setSettings(
   })
   return data?.saveSettings ?? false
 }
+
+/**
+ * Журналы последних входящих и исходящих сообщений аккаунта за `minutes` минут.
+ * Из них собираем список недавних чатов, чтобы он был одинаковым на любом устройстве.
+ */
+export async function lastIncomingMessages(
+  credentials: Credentials,
+  minutes: number,
+  signal?: AbortSignal,
+): Promise<unknown[]> {
+  return journal(credentials, 'lastIncomingMessages', minutes, signal)
+}
+
+export async function lastOutgoingMessages(
+  credentials: Credentials,
+  minutes: number,
+  signal?: AbortSignal,
+): Promise<unknown[]> {
+  return journal(credentials, 'lastOutgoingMessages', minutes, signal)
+}
+
+async function journal(
+  credentials: Credentials,
+  apiMethod: string,
+  minutes: number,
+  signal?: AbortSignal,
+): Promise<unknown[]> {
+  const data = await request<unknown>(credentials, apiMethod, {
+    query: { minutes: String(minutes) },
+    signal,
+  })
+  if (!Array.isArray(data)) throw new ApiError('server')
+  return data
+}

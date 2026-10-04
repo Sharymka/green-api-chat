@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useInstanceSettingsCheck } from '../../hooks/useInstanceSettingsCheck'
 import { useNotifications } from '../../hooks/useNotifications'
+import { useRecentChats } from '../../hooks/useRecentChats'
 import { useChat } from '../../state/chatContext'
 import { ChatList } from '../ChatList/ChatList'
 import { ConnectionBanner } from '../ConnectionBanner/ConnectionBanner'
@@ -17,6 +18,8 @@ export function MessengerScreen() {
   const [newChatOpen, setNewChatOpen] = useState(false)
   // Пока открыт мессенджер, в фоне работает цикл получения входящих сообщений
   useNotifications()
+  // Недавние чаты из GREEN-API — чтобы список был одинаковым на любом компьютере
+  useRecentChats()
   const settingsCheck = useInstanceSettingsCheck()
   const activeChat = state.chats.find((c) => c.chatId === state.activeChatId)
 

@@ -278,6 +278,48 @@ describe('история переписки', () => {
   })
 })
 
+describe('недавние чаты из журнала', () => {
+  const recentMessage = (idMessage: string, timestamp: number) => ({
+    id: idMessage,
+    idMessage,
+    text: `текст ${idMessage}`,
+    direction: 'in' as const,
+    timestamp,
+  })
+
+  it('добавляет новые чаты и ставит наверх самый свежий', () => {
+    const state = reduce([
+      { type: 'chatOpened', chatId: MARIA },
+      {
+        type: 'recentChatsLoaded',
+        chats: [{ chatId: IVAN, name: 'Иван', messages: [recentMessage('A', 5000)] }],
+      },
+    ])
+    expect(state.chats.map((c) => c.chatId)).toEqual([IVAN, MARIA])
+    expect(state.chats[0]).toMatchObject({ name: 'Иван', history: 'idle', unread: 0 })
+  })
+
+  it('у знакомого чата дополняет сообщения без повторов и сохраняет его имя', () => {
+    const state = reduce([
+      { type: 'chatOpened', chatId: IVAN },
+      { type: 'messageReceived', message: incoming({ idMessage: 'A' }) },
+      {
+        type: 'recentChatsLoaded',
+        chats: [
+          {
+            chatId: IVAN,
+            name: 'Другое имя',
+            messages: [recentMessage('OLD', 1), recentMessage('A', 1_700_000_000_000)],
+          },
+        ],
+      },
+    ])
+    expect(state.chats).toHaveLength(1)
+    expect(state.chats[0]?.name).toBe('Иван')
+    expect(state.chats[0]?.messages.map((m) => m.idMessage)).toEqual(['OLD', 'A'])
+  })
+})
+
 describe('соединение', () => {
   it('переключает статус соединения', () => {
     const state = reduce([{ type: 'connectionChanged', connection: 'reconnecting' }])
