@@ -48,14 +48,23 @@ describe('chatsStorage', () => {
   })
 
   it('не падает на испорченных данных и пропускает неверные записи', () => {
-    localStorage.setItem('green-api-chat:chats:111', '{битый json')
+    localStorage.setItem('green-api-chat:chats:v2:111', '{битый json')
     expect(loadChats('111')).toEqual([])
 
     localStorage.setItem(
-      'green-api-chat:chats:111',
+      'green-api-chat:chats:v2:111',
       JSON.stringify([{ chatId: IVAN }, { chatId: 5 }, null, 'строка']),
     )
     expect(loadChats('111')).toEqual([{ chatId: IVAN, name: undefined }])
+  })
+})
+
+describe('старый формат списка чатов', () => {
+  it('удаляется при чтении — там могли остаться чужие контакты', () => {
+    localStorage.setItem('green-api-chat:chats:111', JSON.stringify([{ chatId: IVAN }]))
+
+    expect(loadChats('111')).toEqual([])
+    expect(localStorage.getItem('green-api-chat:chats:111')).toBeNull()
   })
 })
 

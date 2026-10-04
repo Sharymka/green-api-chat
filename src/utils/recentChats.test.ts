@@ -39,13 +39,27 @@ describe('buildRecentChats', () => {
     expect(chats[1]?.messages.map((m) => m.text)).toEqual(['Привет', 'Привет!'])
   })
 
+  it('не показывает чаты, которые ведутся только с телефона', () => {
+    const chats = buildRecentChats([
+      // С Марией переписка только с телефона: входящее и исходящее не через API
+      incoming(MARIA, 'M1', 100, 'Привет, как дела?'),
+      { ...outgoing(MARIA, 'M2', 200, 'Норм'), sendByApi: false },
+      // Ивану писали из приложения
+      outgoing(IVAN, 'I1', 50, 'Здравствуйте'),
+    ])
+
+    expect(chats.map((c) => c.chatId)).toEqual([IVAN])
+  })
+
   it('пропускает группы и нетекстовые сообщения', () => {
     const chats = buildRecentChats([
-      incoming('120363369140947676@g.us', 'G', 100, 'В группе'),
+      outgoing('120363369140947676@g.us', 'G', 100, 'В группе'),
+      outgoing(IVAN, 'I1', 50, 'Здравствуйте'),
       { ...incoming(IVAN, 'P', 200, ''), typeMessage: 'imageMessage' },
     ])
 
-    expect(chats).toEqual([{ chatId: IVAN, name: 'Иван', messages: [] }])
+    expect(chats).toHaveLength(1)
+    expect(chats[0]?.messages.map((m) => m.text)).toEqual(['Здравствуйте'])
   })
 
   it('не падает на мусоре в журнале', () => {

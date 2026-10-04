@@ -26,6 +26,7 @@ export class ApiError extends Error {
 
 export function errorKindFromStatus(status: number): ApiErrorKind {
   if (status === 401 || status === 403) return 'unauthorized'
+  if (status === 408) return 'timeout'
   if (status === 429) return 'rateLimit'
   // 466 GREEN-API присылает, когда закончился лимит тарифа
   if (status === 466) return 'quotaExceeded'

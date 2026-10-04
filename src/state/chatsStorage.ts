@@ -7,12 +7,16 @@ export interface SavedChat {
 // У каждого инстанса свой список, чтобы при входе с другим инстансом не видеть чужие чаты.
 // Сами сообщения сюда не пишем — их отдаёт getChatHistory.
 
+// v2: в первой версии в список могли попасть чужие чаты из журнала GREEN-API —
+// новый ключ просто «забывает» такой список, а чаты из приложения вернутся из журнала
 function key(idInstance: string): string {
-  return `green-api-chat:chats:${idInstance}`
+  return `green-api-chat:chats:v2:${idInstance}`
 }
 
 export function loadChats(idInstance: string): SavedChat[] {
   try {
+    // Удаляем список старого формата: там могли остаться имена чужих контактов
+    localStorage.removeItem(`green-api-chat:chats:${idInstance}`)
     const raw = localStorage.getItem(key(idInstance))
     if (!raw) return []
     const data: unknown = JSON.parse(raw)

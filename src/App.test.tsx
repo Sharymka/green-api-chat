@@ -76,7 +76,7 @@ describe('экран входа', () => {
     await user.click(submit())
 
     await screen.findByRole('button', { name: 'Меню' })
-    expect(localStorage.getItem('green-api-chat:chats:7107000001')).toContain('79001234567')
+    expect(localStorage.getItem('green-api-chat:chats:v2:7107000001')).toContain('79001234567')
   })
 
   it('показывает ошибки под полями и не отправляет запрос', async () => {

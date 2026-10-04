@@ -125,11 +125,18 @@ export async function receiveNotification(
   receiveTimeoutSec = 20,
   signal?: AbortSignal,
 ): Promise<Notification | null> {
-  return request<Notification>(credentials, 'receiveNotification', {
-    query: { receiveTimeout: String(receiveTimeoutSec) },
-    timeoutMs: (receiveTimeoutSec + 10) * 1000,
-    signal,
-  })
+  try {
+    return await request<Notification>(credentials, 'receiveNotification', {
+      query: { receiveTimeout: String(receiveTimeoutSec) },
+      timeoutMs: (receiveTimeoutSec + 10) * 1000,
+      signal,
+    })
+  } catch (error) {
+    // Документация обещает пустой ответ, но на деле, если за время ожидания ничего не пришло,
+    // сервер отвечает 408. Это не ошибка связи, а просто «новых уведомлений нет»
+    if (error instanceof ApiError && error.status === 408) return null
+    throw error
+  }
 }
 
 export async function deleteNotification(

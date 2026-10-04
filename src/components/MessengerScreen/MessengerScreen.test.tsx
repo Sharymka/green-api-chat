@@ -154,7 +154,7 @@ describe('новый чат', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: '+7 900 123-45-67' })).toBeInTheDocument()
-    expect(localStorage.getItem('green-api-chat:chats:7107000001')).toContain(IVAN)
+    expect(localStorage.getItem('green-api-chat:chats:v2:7107000001')).toContain(IVAN)
   })
 
   it('не создаёт дубль, а открывает существующий чат', async () => {
@@ -283,8 +283,28 @@ describe('проверка настроек инстанса', () => {
 })
 
 describe('недавние чаты', () => {
-  it('на новом компьютере показывает чаты из журнала GREEN-API', async () => {
+  it('на новом компьютере показывает чаты, начатые в приложении, но не чаты с телефона', async () => {
+    vi.mocked(lastOutgoingMessages).mockResolvedValue([
+      {
+        type: 'outgoing',
+        idMessage: 'OUT-1',
+        timestamp: 1_699_999_000,
+        typeMessage: 'textMessage',
+        chatId: IVAN,
+        textMessage: 'Здравствуйте',
+        sendByApi: true,
+      },
+    ])
     vi.mocked(lastIncomingMessages).mockResolvedValue([
+      {
+        type: 'incoming',
+        idMessage: 'FRIEND-1',
+        timestamp: 1_700_000_100,
+        typeMessage: 'textMessage',
+        chatId: MARIA,
+        senderName: 'Подруга',
+        textMessage: 'Идём в кино?',
+      },
       {
         type: 'incoming',
         idMessage: 'IN-1',
@@ -299,6 +319,7 @@ describe('недавние чаты', () => {
 
     const item = await within(chatList()).findByRole('button', { name: /Серёжа/ })
     expect(item).toHaveTextContent('Привет!')
+    expect(within(chatList()).queryByText('Подруга')).not.toBeInTheDocument()
     expect(lastIncomingMessages).toHaveBeenCalledWith(credentials, 10080, expect.any(AbortSignal))
   })
 

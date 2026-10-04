@@ -68,6 +68,7 @@ describe('getStateInstance', () => {
     [401, 'unauthorized'],
     [403, 'unauthorized'],
     [400, 'badRequest'],
+    [408, 'timeout'],
     [429, 'rateLimit'],
     [466, 'quotaExceeded'],
     [502, 'server'],
@@ -147,6 +148,18 @@ describe('receiveNotification', () => {
     respond(200, body)
 
     await expect(receiveNotification(credentials)).resolves.toBeNull()
+  })
+
+  it('ответ 408 (за время ожидания ничего не пришло) — это пустая очередь, а не ошибка', async () => {
+    respond(408)
+
+    await expect(receiveNotification(credentials)).resolves.toBeNull()
+  })
+
+  it('другие ошибки receiveNotification пробрасывает дальше', async () => {
+    respond(502)
+
+    expect((await catchError(receiveNotification(credentials))).kind).toBe('server')
   })
 
   it('не обрывает запрос раньше, чем истечёт receiveTimeout', async () => {
