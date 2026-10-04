@@ -5,6 +5,7 @@ import { useRecentChats } from '../../hooks/useRecentChats'
 import { useChat } from '../../state/chatContext'
 import { ChatList } from '../ChatList/ChatList'
 import { ConnectionBanner } from '../ConnectionBanner/ConnectionBanner'
+import { InstanceAlerts } from '../InstanceAlerts/InstanceAlerts'
 import { ChatPane } from '../ChatPane/ChatPane'
 import { NewChatDialog } from '../NewChatDialog/NewChatDialog'
 import { SettingsWarning } from '../SettingsWarning/SettingsWarning'
@@ -49,6 +50,7 @@ export function MessengerScreen() {
           />
         </header>
         <ConnectionBanner reconnecting={state.connection === 'reconnecting'} />
+        <InstanceAlerts />
         <SettingsWarning
           problems={settingsCheck.problems}
           fix={settingsCheck.fix}

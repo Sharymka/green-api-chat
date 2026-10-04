@@ -29,7 +29,7 @@ export function useSendMessage(chatId: string) {
         dispatch({ type: 'messageFailed', chatId, id })
         // Токен перестал подходить (например, его сменили в кабинете) — дальше работать бессмысленно
         if (error instanceof ApiError && error.kind === 'unauthorized') {
-          dispatch({ type: 'loggedOut' })
+          dispatch({ type: 'loggedOut', reason: 'tokenRejected' })
         }
       }
     },

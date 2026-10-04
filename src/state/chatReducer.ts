@@ -1,6 +1,6 @@
-import type { Credentials } from '../api/greenApi'
+import type { Credentials, InstanceState } from '../api/greenApi'
 import { mergeMessages } from '../utils/history'
-import type { IncomingMessage } from '../utils/notifications'
+import type { IncomingMessage, QuotaInfo } from '../utils/notifications'
 import type { RecentChat } from '../utils/recentChats'
 import type { SavedChat } from './chatsStorage'
 
@@ -57,11 +57,19 @@ export interface ChatState {
   chats: Chat[]
   activeChatId: string | null
   connection: 'online' | 'reconnecting'
+  /** Почему пользователя выкинуло на экран входа — чтобы объяснить это, а не молча разлогинить. */
+  logoutReason: 'tokenRejected' | null
+  /** Состояние подключения инстанса к WhatsApp (приходит уведомлением stateInstanceChanged). */
+  instanceState: InstanceState
+  /** Закончился лимит тарифа (уведомление quotaExceeded). */
+  quota: QuotaInfo | null
 }
 
 export type ChatAction =
   | { type: 'loggedIn'; credentials: Credentials; chats?: SavedChat[] }
-  | { type: 'loggedOut' }
+  | { type: 'loggedOut'; reason?: 'tokenRejected' }
+  | { type: 'instanceStateChanged'; instanceState: InstanceState }
+  | { type: 'quotaExceeded'; quota: QuotaInfo }
   | { type: 'chatOpened'; chatId: string }
   | { type: 'chatClosed' }
   | { type: 'messageQueued'; chatId: string; id: string; text: string; timestamp: number }
@@ -89,6 +97,9 @@ export function createInitialState(
     chats: credentials ? savedChats.map(newChat) : [],
     activeChatId: null,
     connection: 'online',
+    logoutReason: null,
+    instanceState: 'authorized',
+    quota: null,
   }
 }
 
@@ -124,8 +135,15 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return createInitialState(action.credentials, action.chats)
 
     case 'loggedOut':
-      // Стираем всё: следующий человек за этим компьютером не должен увидеть чужие переписки
-      return createInitialState()
+      // Стираем всё: следующий человек за этим компьютером не должен увидеть чужие переписки.
+      // Оставляем только причину выхода, чтобы показать её на экране входа
+      return { ...createInitialState(), logoutReason: action.reason ?? null }
+
+    case 'instanceStateChanged':
+      return { ...state, instanceState: action.instanceState }
+
+    case 'quotaExceeded':
+      return { ...state, quota: action.quota }
 
     case 'chatOpened': {
       const exists = state.chats.some((c) => c.chatId === action.chatId)

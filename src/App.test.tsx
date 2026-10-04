@@ -1,9 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useEffect } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from './api/errors'
 import { getStateInstance } from './api/greenApi'
 import App from './App'
+import { useChat } from './state/chatContext'
 import { ChatProvider } from './state/ChatProvider'
 import { saveChats } from './state/chatsStorage'
 import { loadCredentials, saveCredentials } from './state/credentialsStorage'
@@ -163,3 +165,25 @@ describe('выход', () => {
     expect(loadCredentials()).toBeNull()
   })
 })
+
+describe('выход из-за неподходящего токена', () => {
+  it('объясняет на экране входа, почему пришлось войти заново', () => {
+    render(
+      <ChatProvider>
+        <LogoutWithReason />
+        <App />
+      </ChatProvider>,
+    )
+
+    expect(screen.getByText(/GREEN-API больше не принимает этот токен/)).toBeInTheDocument()
+  })
+})
+
+/** Имитирует выход из-за ошибки 401: так делают цикл получения и отправка. */
+function LogoutWithReason() {
+  const { dispatch } = useChat()
+  useEffect(() => {
+    dispatch({ type: 'loggedOut', reason: 'tokenRejected' })
+  }, [dispatch])
+  return null
+}

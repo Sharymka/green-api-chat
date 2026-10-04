@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../../api/errors'
-import { getStateInstance, type Credentials, type InstanceState } from '../../api/greenApi'
+import { getStateInstance, type Credentials } from '../../api/greenApi'
 import { useChat } from '../../state/chatContext'
 import { loadChats } from '../../state/chatsStorage'
+import { instanceStateMessage } from '../../utils/instanceState'
 import {
   normalizeCredentials,
   validateCredentials,
@@ -14,24 +15,8 @@ import styles from './LoginScreen.module.css'
 
 const EMPTY: Credentials = { idInstance: '', apiTokenInstance: '', apiUrl: '' }
 
-/** Почему не пускаем, если инстанс отвечает, но не готов к работе. */
-function stateMessage(state: InstanceState): string {
-  switch (state) {
-    case 'notAuthorized':
-      return 'Инстанс не авторизован: отсканируйте QR-код в личном кабинете GREEN-API'
-    case 'blocked':
-      return 'Инстанс заблокирован'
-    case 'starting':
-      return 'Инстанс запускается, попробуйте через пару минут'
-    case 'yellowCard':
-      return 'Отправка сообщений с этого номера временно ограничена WhatsApp'
-    default:
-      return `Инстанс сейчас недоступен (статус: ${state})`
-  }
-}
-
 export function LoginScreen() {
-  const { dispatch } = useChat()
+  const { state, dispatch } = useChat()
   const [values, setValues] = useState<Credentials>(EMPTY)
   const [errors, setErrors] = useState<CredentialsErrors>({})
   const [formError, setFormError] = useState<string>()
@@ -76,7 +61,7 @@ export function LoginScreen() {
       // Проверяем данные сразу, а не при первой отправке сообщения
       const state = await getStateInstance(credentials, controller.signal)
       if (state !== 'authorized') {
-        setFormError(stateMessage(state))
+        setFormError(instanceStateMessage(state))
         return
       }
       dispatch({ type: 'loggedIn', credentials, chats: loadChats(credentials.idInstance) })
@@ -101,6 +86,13 @@ export function LoginScreen() {
           </a>{' '}
           на странице инстанса
         </p>
+
+        {state.logoutReason === 'tokenRejected' && (
+          <output className={styles.notice}>
+            Вы вышли из аккаунта: GREEN-API больше не принимает этот токен. Возможно, его сменили в
+            личном кабинете. Войдите с актуальными данными.
+          </output>
+        )}
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <TextField

@@ -50,20 +50,49 @@ export type FixState =
  * все уведомления в GREEN-API выключены, и без подсказки легко не понять,
  * почему ответы не приходят. Предлагает исправить настройки одной кнопкой (setSettings).
  */
+/** Как часто перепроверять настройки, пока вкладка открыта. */
+const RECHECK_INTERVAL_MS = 5 * 60 * 1000
+
+/** «Отпечаток» набора проблем: если человек скрыл предупреждение, не показываем его снова, пока проблемы те же. */
+const problemsKey = (problems: SettingsProblem[]) => problems.map((p) => p.id).join(',')
+
 export function useInstanceSettingsCheck() {
   const { state } = useChat()
   const { credentials } = state
   const [problems, setProblems] = useState<SettingsProblem[]>([])
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null)
   const [fix, setFix] = useState<FixState>({ status: 'idle' })
 
+  // Настройки могут поменять в личном кабинете, пока приложение открыто, а уведомления об этом
+  // GREEN-API не присылает (а с заданным webhookUrl в очередь вообще ничего не придёт).
+  // Поэтому спрашиваем сами: при входе, при возвращении во вкладку и раз в 5 минут
   useEffect(() => {
     if (!credentials) return
     const controller = new AbortController()
-    getSettings(credentials, controller.signal)
-      .then((settings) => setProblems(findSettingsProblems(settings)))
-      // Проверка — лишь подсказка: если не удалась, чат всё равно работает
-      .catch(() => {})
-    return () => controller.abort()
+
+    const check = () => {
+      getSettings(credentials, controller.signal)
+        .then((settings) => {
+          const found = findSettingsProblems(settings)
+          setProblems(found)
+          // Всё исправилось — сбрасываем «сохранено», чтобы при новой проблеме снова предложить кнопку
+          if (found.length === 0) setFix({ status: 'idle' })
+        })
+        // Проверка — лишь подсказка: если не удалась, чат всё равно работает
+        .catch(() => {})
+    }
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') check()
+    }
+
+    check()
+    const timer = setInterval(check, RECHECK_INTERVAL_MS)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      controller.abort()
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [credentials])
 
   const fixSettings = useCallback(async () => {
@@ -81,7 +110,8 @@ export function useInstanceSettingsCheck() {
     }
   }, [credentials])
 
-  const dismiss = useCallback(() => setProblems([]), [])
+  const dismiss = useCallback(() => setDismissedKey(problemsKey(problems)), [problems])
 
-  return { problems, fix, fixSettings, dismiss }
+  const visible = problemsKey(problems) === dismissedKey ? [] : problems
+  return { problems: visible, fix, fixSettings, dismiss }
 }

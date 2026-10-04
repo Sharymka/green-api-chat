@@ -49,6 +49,29 @@ describe('вход и выход', () => {
   })
 })
 
+describe('проблемы инстанса', () => {
+  it('при выходе из-за неподходящего токена запоминает причину, а при входе забывает', () => {
+    const out = reduce([{ type: 'loggedOut', reason: 'tokenRejected' }])
+    expect(out.credentials).toBeNull()
+    expect(out.logoutReason).toBe('tokenRejected')
+
+    expect(chatReducer(out, { type: 'loggedIn', credentials }).logoutReason).toBeNull()
+  })
+
+  it('обычный выход — без причины', () => {
+    expect(reduce([{ type: 'loggedOut' }]).logoutReason).toBeNull()
+  })
+
+  it('запоминает состояние инстанса и лимит тарифа', () => {
+    const state = reduce([
+      { type: 'instanceStateChanged', instanceState: 'notAuthorized' },
+      { type: 'quotaExceeded', quota: { total: 3, used: 3, allowedChatIds: [] } },
+    ])
+    expect(state.instanceState).toBe('notAuthorized')
+    expect(state.quota).toEqual({ total: 3, used: 3, allowedChatIds: [] })
+  })
+})
+
 describe('чаты', () => {
   it('создаёт новый чат, ставит его первым и открывает', () => {
     const state = reduce([

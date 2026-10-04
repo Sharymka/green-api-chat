@@ -332,3 +332,61 @@ describe('недавние чаты', () => {
     expect(within(chatList()).getByRole('button', { name: /Иван/ })).toBeInTheDocument()
   })
 })
+
+describe('плашки о проблемах инстанса', () => {
+  it('показывает, что WhatsApp отключён, и прячет плашку после переподключения', () => {
+    renderMessenger()
+
+    act(() => dispatchRef?.({ type: 'instanceStateChanged', instanceState: 'notAuthorized' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('WhatsApp отключён от GREEN-API')
+    expect(screen.getByRole('alert')).toHaveTextContent('отсканируйте QR-код')
+
+    act(() => dispatchRef?.({ type: 'instanceStateChanged', instanceState: 'authorized' }))
+    expect(screen.queryByText('WhatsApp отключён от GREEN-API')).not.toBeInTheDocument()
+  })
+
+  it('объясняет лимит тарифа и показывает, с кем ещё можно переписываться', async () => {
+    const user = renderMessenger()
+
+    act(() =>
+      dispatchRef?.({
+        type: 'quotaExceeded',
+        quota: { used: 3, total: 3, allowedChatIds: ['120363000000000001@g.us', IVAN] },
+      }),
+    )
+    expect(screen.getByText('Закончился лимит тарифа GREEN-API')).toBeInTheDocument()
+    expect(screen.getByText(/можно переписываться с 3 собеседниками/)).toBeInTheDocument()
+    expect(screen.getByText('Доступны только: группа, +7 900 123-45-67.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Скрыть предупреждение о лимите' }))
+    expect(screen.queryByText('Закончился лимит тарифа GREEN-API')).not.toBeInTheDocument()
+  })
+})
+
+describe('повторная проверка настроек', () => {
+  it('перепроверяет настройки, когда пользователь возвращается во вкладку', async () => {
+    renderMessenger()
+    await waitFor(() => expect(getSettings).toHaveBeenCalledTimes(1))
+
+    // Пока вкладка была скрыта, в личном кабинете выключили уведомления о входящих
+    vi.mocked(getSettings).mockResolvedValue({ ...GOOD_SETTINGS, incomingWebhook: 'no' })
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+
+    expect(await screen.findByText(/Выключены уведомления о входящих/)).toBeInTheDocument()
+  })
+
+  it('скрытое предупреждение не всплывает снова, пока проблема та же', async () => {
+    vi.mocked(getSettings).mockResolvedValue({ ...GOOD_SETTINGS, incomingWebhook: 'no' })
+    const user = renderMessenger()
+    await user.click(await screen.findByRole('button', { name: 'Скрыть предупреждение' }))
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    await waitFor(() => expect(getSettings).toHaveBeenCalledTimes(2))
+
+    expect(screen.queryByText('Проверьте настройки инстанса')).not.toBeInTheDocument()
+  })
+})

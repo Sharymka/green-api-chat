@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { parseIncomingMessage, parseStatusUpdate } from './notifications'
+import {
+  parseIncomingMessage,
+  parseInstanceState,
+  parseQuotaExceeded,
+  parseStatusUpdate,
+} from './notifications'
 
 /** Входящее сообщение в том виде, как его показывает документация GREEN-API. */
 function incoming(messageData: unknown, overrides: Record<string, unknown> = {}) {
@@ -111,5 +116,53 @@ describe('parseStatusUpdate', () => {
     ['null', null],
   ])('пропускает: %s', (_name, body) => {
     expect(parseStatusUpdate(body)).toBeNull()
+  })
+})
+
+describe('parseInstanceState', () => {
+  it('достаёт новое состояние инстанса', () => {
+    expect(
+      parseInstanceState({ typeWebhook: 'stateInstanceChanged', stateInstance: 'notAuthorized' }),
+    ).toBe('notAuthorized')
+  })
+
+  it('пропускает другие уведомления', () => {
+    expect(parseInstanceState({ typeWebhook: 'incomingMessageReceived' })).toBeNull()
+  })
+})
+
+describe('parseQuotaExceeded', () => {
+  /** Уведомление в том виде, в каком его реально прислал GREEN-API (номера заменены). */
+  const quotaBody = {
+    typeWebhook: 'quotaExceeded',
+    instanceData: { idInstance: 7107000001, wid: '79000000000@c.us', typeInstance: 'whatsapp' },
+    quotaData: {
+      method: 'correspondents',
+      used: 3,
+      total: 3,
+      status: 'CORRESPONDENTS_QUOTE_EXCEEDED',
+      description:
+        'Monthly quota has been exceeded. You can only send or receive messages from these numbers: 120363000000000001@g.us,79001234567@c.us. Please go to your personal account and change the tariff to business https://console.green-api.com',
+    },
+  }
+
+  it('достаёт лимит и список разрешённых собеседников из описания', () => {
+    expect(parseQuotaExceeded(quotaBody)).toEqual({
+      used: 3,
+      total: 3,
+      allowedChatIds: ['120363000000000001@g.us', '79001234567@c.us'],
+    })
+  })
+
+  it('не падает, если данных о лимите нет', () => {
+    expect(parseQuotaExceeded({ typeWebhook: 'quotaExceeded' })).toEqual({
+      used: undefined,
+      total: undefined,
+      allowedChatIds: [],
+    })
+  })
+
+  it('пропускает другие уведомления', () => {
+    expect(parseQuotaExceeded({ typeWebhook: 'outgoingMessageStatus' })).toBeNull()
   })
 })

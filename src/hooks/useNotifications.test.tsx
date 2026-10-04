@@ -223,11 +223,41 @@ describe('цикл получения сообщений', () => {
     await waitFor(() => expect(receiveMock).toHaveBeenCalledTimes(1))
   })
 
+  it('показывает, что инстанс отключили от WhatsApp, и убирает это после переподключения', async () => {
+    serverReplies([
+      {
+        receiptId: 1,
+        body: { typeWebhook: 'stateInstanceChanged', stateInstance: 'notAuthorized' },
+      },
+    ])
+    const { result } = renderLoop()
+    await waitFor(() => expect(result.current.state.instanceState).toBe('notAuthorized'))
+
+    act(() =>
+      result.current.dispatch({ type: 'instanceStateChanged', instanceState: 'authorized' }),
+    )
+    expect(result.current.state.instanceState).toBe('authorized')
+  })
+
+  it('запоминает, что закончился лимит тарифа', async () => {
+    serverReplies([
+      {
+        receiptId: 1,
+        body: { typeWebhook: 'quotaExceeded', quotaData: { used: 3, total: 3, description: '' } },
+      },
+    ])
+    const { result } = renderLoop()
+
+    await waitFor(() => expect(result.current.state.quota).toMatchObject({ total: 3 }))
+    expect(deleteMock).toHaveBeenCalledWith(credentials, 1, expect.any(AbortSignal))
+  })
+
   it('если токен больше не подходит — выходит из аккаунта и останавливается', async () => {
     serverReplies([new ApiError('unauthorized', 401)])
     const { result } = renderLoop()
 
     await waitFor(() => expect(result.current.state.credentials).toBeNull())
+    expect(result.current.state.logoutReason).toBe('tokenRejected')
     expect(receiveMock).toHaveBeenCalledTimes(1)
   })
 

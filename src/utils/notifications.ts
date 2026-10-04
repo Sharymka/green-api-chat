@@ -1,3 +1,4 @@
+import type { InstanceState } from '../api/greenApi'
 import type { DeliveryStatus } from '../state/chatReducer'
 
 export interface IncomingMessage {
@@ -87,5 +88,34 @@ export function parseStatusUpdate(body: unknown): StatusUpdate | null {
       return { chatId, idMessage, status: 'failed' }
     default:
       return null
+  }
+}
+
+/** Уведомление stateInstanceChanged: инстанс подключили к WhatsApp, отключили, заблокировали… */
+export function parseInstanceState(body: unknown): InstanceState | null {
+  if (!isRecord(body) || body.typeWebhook !== 'stateInstanceChanged') return null
+  return getString(body.stateInstance) ?? null
+}
+
+export interface QuotaInfo {
+  used?: number
+  total?: number
+  /** С кем ещё можно переписываться в этом месяце (chatId из описания GREEN-API). */
+  allowedChatIds: string[]
+}
+
+/**
+ * Уведомление quotaExceeded: на бесплатном тарифе за месяц можно переписываться
+ * лишь с несколькими собеседниками. Список разрешённых GREEN-API пишет только текстом
+ * в description, поэтому достаём chatId оттуда.
+ */
+export function parseQuotaExceeded(body: unknown): QuotaInfo | null {
+  if (!isRecord(body) || body.typeWebhook !== 'quotaExceeded') return null
+  const data = isRecord(body.quotaData) ? body.quotaData : {}
+  const description = getString(data.description) ?? ''
+  return {
+    used: typeof data.used === 'number' ? data.used : undefined,
+    total: typeof data.total === 'number' ? data.total : undefined,
+    allowedChatIds: description.match(/\d+@(?:c|g)\.us/g) ?? [],
   }
 }

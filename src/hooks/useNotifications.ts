@@ -2,7 +2,12 @@ import { useEffect } from 'react'
 import { ApiError } from '../api/errors'
 import { deleteNotification, receiveNotification } from '../api/greenApi'
 import { useChat } from '../state/chatContext'
-import { parseIncomingMessage, parseStatusUpdate } from '../utils/notifications'
+import {
+  parseIncomingMessage,
+  parseInstanceState,
+  parseQuotaExceeded,
+  parseStatusUpdate,
+} from '../utils/notifications'
 import { nextDelay, wait } from '../utils/wait'
 
 /** Сколько секунд сервер держит запрос, ожидая новое уведомление. */
@@ -62,13 +67,19 @@ export function useNotifications() {
           // «Доставлено» и «прочитано» для наших сообщений приходят через ту же очередь
           const statusUpdate = parseStatusUpdate(notification.body)
           if (statusUpdate) dispatch({ type: 'messageStatusUpdated', ...statusUpdate })
+          // Инстанс отключили от WhatsApp (или подключили обратно) — показываем или убираем плашку
+          const instanceState = parseInstanceState(notification.body)
+          if (instanceState) dispatch({ type: 'instanceStateChanged', instanceState })
+          // Закончился лимит тарифа — объясняем, почему сообщения не доходят
+          const quota = parseQuotaExceeded(notification.body)
+          if (quota) dispatch({ type: 'quotaExceeded', quota })
           // Удаляем любое уведомление, даже ненужное нам (статусы, фото), иначе очередь застрянет.
           // Если удалить не получится, уведомление придёт ещё раз — повтор отсечёт reducer по idMessage
           await deleteNotification(creds, notification.receiptId, signal)
         } catch (error) {
           if (signal.aborted) return
           if (error instanceof ApiError && error.kind === 'unauthorized') {
-            dispatch({ type: 'loggedOut' })
+            dispatch({ type: 'loggedOut', reason: 'tokenRejected' })
             return
           }
           dispatch({ type: 'connectionChanged', connection: 'reconnecting' })

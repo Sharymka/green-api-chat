@@ -7,7 +7,13 @@ export interface Credentials {
 }
 
 export type InstanceState =
-  'authorized' | 'notAuthorized' | 'blocked' | 'starting' | 'yellowCard' | (string & {})
+  | 'authorized'
+  | 'notAuthorized'
+  | 'blocked'
+  | 'starting'
+  | 'yellowCard'
+  | 'suspended'
+  | (string & {})
 
 export interface Notification {
   receiptId: number
