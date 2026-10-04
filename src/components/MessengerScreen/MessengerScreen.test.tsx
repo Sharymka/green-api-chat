@@ -161,7 +161,8 @@ describe('новый чат', () => {
     const user = renderMessenger([{ chatId: IVAN, name: 'Иван' }, { chatId: MARIA }])
 
     await user.click(screen.getByRole('button', { name: 'Новый чат' }))
-    await user.type(screen.getByLabelText('Номер телефона'), '+79001234567')
+    // Номер без кода страны — всё равно тот же самый Иван
+    await user.type(screen.getByLabelText('Номер телефона'), '900 123 45 67')
     await user.click(screen.getByRole('button', { name: 'Начать чат' }))
 
     expect(within(chatList()).getAllByRole('listitem')).toHaveLength(2)
