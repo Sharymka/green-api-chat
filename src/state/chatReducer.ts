@@ -3,7 +3,29 @@ import { mergeMessages } from '../utils/history'
 import type { IncomingMessage } from '../utils/notifications'
 import type { SavedChat } from './chatsStorage'
 
-export type MessageStatus = 'pending' | 'sent' | 'failed'
+export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
+
+/** Статусы, которые сообщает WhatsApp про уже отправленное сообщение. */
+export type DeliveryStatus = 'sent' | 'delivered' | 'read' | 'failed'
+
+// Порядок «продвижения» сообщения: отправлено → доставлено → прочитано
+const PROGRESS: Record<MessageStatus, number> = {
+  pending: 0,
+  failed: 0,
+  sent: 1,
+  delivered: 2,
+  read: 3,
+}
+
+/**
+ * Можно ли сменить статус сообщения. Статусы приходят не всегда по порядку, поэтому:
+ * - «прочитано» не превращаем обратно в «доставлено» — статус только растёт;
+ * - ошибка (например, у номера нет WhatsApp) применяется, пока сообщение не доставлено.
+ */
+function canChangeStatus(current: MessageStatus, next: DeliveryStatus): boolean {
+  if (next === 'failed') return current === 'pending' || current === 'sent'
+  return PROGRESS[next] > PROGRESS[current]
+}
 
 export interface Message {
   /** Наш собственный id: у исходящего он появляется раньше, чем GREEN-API вернёт idMessage. */
@@ -14,7 +36,7 @@ export interface Message {
   direction: 'in' | 'out'
   /** Время в миллисекундах. */
   timestamp: number
-  /** Только у исходящих: отправляется, отправлено или ошибка. */
+  /** Только у исходящих: отправляется → отправлено → доставлено → прочитано, или ошибка. */
   status?: MessageStatus
 }
 
@@ -46,6 +68,7 @@ export type ChatAction =
   | { type: 'messageFailed'; chatId: string; id: string }
   | { type: 'messageRetried'; chatId: string; id: string }
   | { type: 'messageReceived'; message: IncomingMessage }
+  | { type: 'messageStatusUpdated'; chatId: string; idMessage: string; status: DeliveryStatus }
   | { type: 'historyRequested'; chatId: string }
   | { type: 'historyLoaded'; chatId: string; messages: Message[]; name?: string }
   | { type: 'historyFailed'; chatId: string }
@@ -78,6 +101,8 @@ function updateChat(
   if (!chat) return chats
 
   const updated = update(chat)
+  // Ничего не поменялось — возвращаем тот же массив, чтобы React не перерисовывал зря
+  if (updated === chat) return chats
   if (!moveToTop) return chats.map((c) => (c === chat ? updated : c))
   return [updated, ...chats.filter((c) => c !== chat)]
 }
@@ -182,6 +207,19 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
         true,
       )
       return { ...state, chats }
+    }
+
+    case 'messageStatusUpdated': {
+      const { chatId, idMessage, status } = action
+      const chats = updateChat(state.chats, chatId, (chat) => {
+        const message = chat.messages.find((m) => m.idMessage === idMessage)
+        if (!message?.status || !canChangeStatus(message.status, status)) return chat
+        return {
+          ...chat,
+          messages: chat.messages.map((m) => (m === message ? { ...m, status } : m)),
+        }
+      })
+      return chats === state.chats ? state : { ...state, chats }
     }
 
     case 'historyRequested':

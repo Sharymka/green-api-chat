@@ -115,3 +115,12 @@ export function MoreIcon(props: IconProps) {
     </Icon>
   )
 }
+
+/** Две галочки: «доставлено» и «прочитано». */
+export function DoubleCheckIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth="2.2" viewBox="0 0 28 24" width="18" {...props}>
+      <path d="m2 12.5 5 5L18 6.5M12 16.5l1 1L24 6.5" />
+    </Icon>
+  )
+}

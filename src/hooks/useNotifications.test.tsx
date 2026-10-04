@@ -163,6 +163,40 @@ describe('цикл получения сообщений', () => {
     expect(result.current.state.connection).toBe('reconnecting')
   })
 
+  it('обновляет галочки нашего сообщения по уведомлению о статусе', async () => {
+    // Первый запрос «висит», пока мы не отправим сообщение, а потом приходит статус «прочитано»
+    let releaseStatus: (n: Notification) => void = () => {}
+    receiveMock
+      .mockImplementationOnce(() => new Promise((resolve) => (releaseStatus = resolve)))
+      .mockImplementation(silentReceive)
+    const { result } = renderLoop()
+    act(() => {
+      result.current.dispatch({
+        type: 'messageQueued',
+        chatId: IVAN,
+        id: 'l1',
+        text: 'Привет',
+        timestamp: 1,
+      })
+      result.current.dispatch({ type: 'messageSent', chatId: IVAN, id: 'l1', idMessage: 'OUT-1' })
+    })
+
+    await act(async () =>
+      releaseStatus({
+        receiptId: 3,
+        body: {
+          typeWebhook: 'outgoingMessageStatus',
+          chatId: IVAN,
+          idMessage: 'OUT-1',
+          status: 'read',
+        },
+      }),
+    )
+
+    await waitFor(() => expect(result.current.state.chats[0]?.messages[0]?.status).toBe('read'))
+    expect(deleteMock).toHaveBeenCalledWith(credentials, 3, expect.any(AbortSignal))
+  })
+
   it('если токен больше не подходит — выходит из аккаунта и останавливается', async () => {
     serverReplies([new ApiError('unauthorized', 401)])
     const { result } = renderLoop()

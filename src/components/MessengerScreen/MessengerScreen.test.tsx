@@ -1,8 +1,8 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useEffect } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getChatHistory } from '../../api/greenApi'
+import { getChatHistory, getSettings, setSettings } from '../../api/greenApi'
 import { useChat } from '../../state/chatContext'
 import { ChatProvider } from '../../state/ChatProvider'
 import { saveChats } from '../../state/chatsStorage'
@@ -46,11 +46,17 @@ vi.mock('../../api/greenApi', async (importOriginal) => {
     ...actual,
     receiveNotification: (await import('../../test/api')).silentReceive,
     getChatHistory: vi.fn<typeof actual.getChatHistory>(),
+    getSettings: vi.fn<typeof actual.getSettings>(),
+    setSettings: vi.fn<typeof actual.setSettings>(),
   }
 })
 
+const GOOD_SETTINGS = { webhookUrl: '', incomingWebhook: 'yes', outgoingWebhook: 'yes' } as const
+
 beforeEach(() => {
   vi.mocked(getChatHistory).mockResolvedValue([])
+  vi.mocked(getSettings).mockResolvedValue(GOOD_SETTINGS)
+  vi.mocked(setSettings).mockReset()
 })
 
 const chatList = () => screen.getByRole('complementary', { name: 'Чаты' })
@@ -212,5 +218,56 @@ describe('меню «⋮»', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Выйти' }))
 
     expect(loadCredentials()).toBeNull()
+  })
+})
+
+describe('проверка настроек инстанса', () => {
+  it('при правильных настройках ничего не показывает', async () => {
+    renderMessenger()
+    await waitFor(() => expect(getSettings).toHaveBeenCalled())
+    expect(screen.queryByText('Проверьте настройки инстанса')).not.toBeInTheDocument()
+  })
+
+  it('объясняет, почему не приходят сообщения, и исправляет настройки по кнопке', async () => {
+    vi.mocked(getSettings).mockResolvedValue({
+      webhookUrl: 'https://example.com/hook',
+      incomingWebhook: 'no',
+      outgoingWebhook: 'no',
+    })
+    vi.mocked(setSettings).mockResolvedValue(true)
+    const user = renderMessenger()
+
+    expect(await screen.findByText('Проверьте настройки инстанса')).toBeInTheDocument()
+    expect(screen.getByText(/Указан webhookUrl/)).toBeInTheDocument()
+    expect(screen.getByText(/Выключены уведомления о входящих/)).toBeInTheDocument()
+    expect(screen.getByText(/Выключены уведомления о статусах/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Исправить настройки' }))
+
+    expect(setSettings).toHaveBeenCalledWith(credentials, {
+      webhookUrl: '',
+      incomingWebhook: 'yes',
+      outgoingWebhook: 'yes',
+    })
+    expect(await screen.findByText(/Настройки сохранены/)).toBeInTheDocument()
+  })
+
+  it('сообщает, если исправить не получилось', async () => {
+    vi.mocked(getSettings).mockResolvedValue({ ...GOOD_SETTINGS, incomingWebhook: 'no' })
+    vi.mocked(setSettings).mockRejectedValue(new Error('network'))
+    const user = renderMessenger()
+
+    await user.click(await screen.findByRole('button', { name: 'Исправить настройки' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Не получилось')
+  })
+
+  it('предупреждение можно скрыть', async () => {
+    vi.mocked(getSettings).mockResolvedValue({ ...GOOD_SETTINGS, incomingWebhook: 'no' })
+    const user = renderMessenger()
+
+    await user.click(await screen.findByRole('button', { name: 'Скрыть предупреждение' }))
+
+    expect(screen.queryByText('Проверьте настройки инстанса')).not.toBeInTheDocument()
   })
 })

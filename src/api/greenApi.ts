@@ -163,3 +163,36 @@ export async function getChatHistory(
   if (!Array.isArray(data)) throw new ApiError('server')
   return data
 }
+
+/** Настройки инстанса, которые важны для работы чата. Остальные поля нам не нужны. */
+export interface InstanceSettings {
+  /** Адрес webhook. Если он заполнен, уведомления уходят туда, а не в очередь HTTP API. */
+  webhookUrl?: string
+  /** Уведомления о входящих сообщениях: без них ответы не появятся в реальном времени. */
+  incomingWebhook?: 'yes' | 'no'
+  /** Уведомления о статусах наших сообщений: доставлено, прочитано. */
+  outgoingWebhook?: 'yes' | 'no'
+}
+
+export async function getSettings(
+  credentials: Credentials,
+  signal?: AbortSignal,
+): Promise<InstanceSettings> {
+  const data = await request<InstanceSettings>(credentials, 'getSettings', { signal })
+  if (!data) throw new ApiError('server')
+  return data
+}
+
+/** Меняет только переданные настройки инстанса. GREEN-API применяет их в течение пары минут. */
+export async function setSettings(
+  credentials: Credentials,
+  settings: InstanceSettings,
+  signal?: AbortSignal,
+): Promise<boolean> {
+  const data = await request<{ saveSettings: boolean }>(credentials, 'setSettings', {
+    method: 'POST',
+    body: settings,
+    signal,
+  })
+  return data?.saveSettings ?? false
+}

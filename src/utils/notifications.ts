@@ -1,3 +1,5 @@
+import type { DeliveryStatus } from '../state/chatReducer'
+
 export interface IncomingMessage {
   idMessage: string
   chatId: string
@@ -53,5 +55,37 @@ export function parseIncomingMessage(body: unknown): IncomingMessage | null {
     text,
     timestamp: typeof body.timestamp === 'number' ? body.timestamp : Math.floor(Date.now() / 1000),
     senderName: getString(senderData.senderName) ?? getString(senderData.chatName),
+  }
+}
+
+export interface StatusUpdate {
+  chatId: string
+  idMessage: string
+  status: DeliveryStatus
+}
+
+/**
+ * Достаёт из уведомления новый статус нашего сообщения: отправлено, доставлено, прочитано или ошибка.
+ * noAccount (у номера нет WhatsApp), suspended и yellowCard для пользователя означают одно — не дошло.
+ */
+export function parseStatusUpdate(body: unknown): StatusUpdate | null {
+  if (!isRecord(body) || body.typeWebhook !== 'outgoingMessageStatus') return null
+
+  const chatId = getString(body.chatId)
+  const idMessage = getString(body.idMessage)
+  if (!chatId || !idMessage) return null
+
+  switch (body.status) {
+    case 'sent':
+    case 'delivered':
+    case 'read':
+      return { chatId, idMessage, status: body.status }
+    case 'failed':
+    case 'noAccount':
+    case 'suspended':
+    case 'yellowCard':
+      return { chatId, idMessage, status: 'failed' }
+    default:
+      return null
   }
 }

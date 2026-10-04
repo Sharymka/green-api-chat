@@ -22,7 +22,8 @@
 
   --color-bubble-in: #ffffff;
   --color-bubble-out: #e7fcd9;
-  --color-check: #00a884;
+  --color-check: #667781;
+  --color-check-read: #2b9fd9;
   --color-danger: #d32f2f;
   --color-danger-bg: #fdecea;
   --color-warning-bg: #fff4ce;
@@ -67,7 +68,8 @@
 
     --color-bubble-in: #202c33;
     --color-bubble-out: #005c4b;
-    --color-check: #53bdeb;
+    --color-check: #8696a0;
+    --color-check-read: #53bdeb;
     --color-danger: #f15c6d;
     --color-danger-bg: #3b1f24;
     --color-warning-bg: #3d3416;

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { ApiError } from '../api/errors'
 import { deleteNotification, receiveNotification } from '../api/greenApi'
 import { useChat } from '../state/chatContext'
-import { parseIncomingMessage } from '../utils/notifications'
+import { parseIncomingMessage, parseStatusUpdate } from '../utils/notifications'
 import { nextDelay, wait } from '../utils/wait'
 
 /** Сколько секунд сервер держит запрос, ожидая новое уведомление. */
@@ -11,7 +11,7 @@ const RECEIVE_TIMEOUT_SEC = 20
 /**
  * Фоновый цикл получения входящих сообщений (HTTP API GREEN-API):
  * 1. спрашиваем «есть новое?» (receiveNotification) — сервер ждёт до 20 секунд;
- * 2. если это текстовое сообщение — показываем его в нужном чате;
+ * 2. если это текстовое сообщение — показываем его в нужном чате, если статус нашего — обновляем галочки;
  * 3. удаляем уведомление из очереди (deleteNotification), иначе получим его снова;
  * 4. повторяем.
  * Если связь пропала — показываем плашку и пробуем снова с растущей паузой.
@@ -43,6 +43,9 @@ export function useNotifications() {
 
           const message = parseIncomingMessage(notification.body)
           if (message) dispatch({ type: 'messageReceived', message })
+          // «Доставлено» и «прочитано» для наших сообщений приходят через ту же очередь
+          const statusUpdate = parseStatusUpdate(notification.body)
+          if (statusUpdate) dispatch({ type: 'messageStatusUpdated', ...statusUpdate })
           // Удаляем любое уведомление, даже ненужное нам (статусы, фото), иначе очередь застрянет.
           // Если удалить не получится, уведомление придёт ещё раз — повтор отсечёт reducer по idMessage
           await deleteNotification(creds, notification.receiptId, signal)

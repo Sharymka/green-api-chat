@@ -1,7 +1,7 @@
 import { Fragment, useLayoutEffect, useRef } from 'react'
 import type { Chat, Message } from '../../state/chatReducer'
 import { dayKey, formatDayLabel, formatMessageTime } from '../../utils/time'
-import { AlertIcon, CheckIcon, ClockIcon } from '../ui/icons'
+import { AlertIcon, CheckIcon, ClockIcon, DoubleCheckIcon } from '../ui/icons'
 import styles from './MessageList.module.css'
 
 interface MessageListProps {
@@ -28,6 +28,21 @@ function MessageStatus({ message, onRetry }: { message: Message; onRetry: () => 
         <span className={styles.status} title="Отправлено">
           <CheckIcon width={15} height={15} />
           <span className="visually-hidden">отправлено</span>
+        </span>
+      )
+    case 'delivered':
+      return (
+        <span className={styles.status} title="Доставлено">
+          <DoubleCheckIcon width={18} height={15} />
+          <span className="visually-hidden">доставлено</span>
+        </span>
+      )
+    case 'read':
+      // Голубые галочки, как в WhatsApp
+      return (
+        <span className={`${styles.status} ${styles.read}`} title="Прочитано">
+          <DoubleCheckIcon width={18} height={15} />
+          <span className="visually-hidden">прочитано</span>
         </span>
       )
     case 'failed':

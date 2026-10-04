@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseIncomingMessage } from './notifications'
+import { parseIncomingMessage, parseStatusUpdate } from './notifications'
 
 /** Входящее сообщение в том виде, как его показывает документация GREEN-API. */
 function incoming(messageData: unknown, overrides: Record<string, unknown> = {}) {
@@ -74,5 +74,42 @@ describe('parseIncomingMessage', () => {
     ],
   ])('пропускает: %s', (_name, body) => {
     expect(parseIncomingMessage(body)).toBeNull()
+  })
+})
+
+describe('parseStatusUpdate', () => {
+  /** Уведомление о статусе в том виде, как его показывает документация GREEN-API. */
+  const statusBody = (status: string) => ({
+    typeWebhook: 'outgoingMessageStatus',
+    chatId: '79001234567@c.us',
+    instanceData: { idInstance: 7107000001, wid: '79876543210@c.us', typeInstance: 'whatsapp' },
+    timestamp: 1727691478,
+    idMessage: '3EB0608D6A2901063D63',
+    status,
+    sendByApi: true,
+  })
+
+  it.each(['sent', 'delivered', 'read'])('разбирает статус %s', (status) => {
+    expect(parseStatusUpdate(statusBody(status))).toEqual({
+      chatId: '79001234567@c.us',
+      idMessage: '3EB0608D6A2901063D63',
+      status,
+    })
+  })
+
+  it.each(['failed', 'noAccount', 'suspended', 'yellowCard'])(
+    'статус %s считает ошибкой доставки',
+    (status) => {
+      expect(parseStatusUpdate(statusBody(status))?.status).toBe('failed')
+    },
+  )
+
+  it.each([
+    ['входящее сообщение', { typeWebhook: 'incomingMessageReceived' }],
+    ['неизвестный статус', statusBody('somethingNew')],
+    ['нет idMessage', { ...statusBody('read'), idMessage: undefined }],
+    ['null', null],
+  ])('пропускает: %s', (_name, body) => {
+    expect(parseStatusUpdate(body)).toBeNull()
   })
 })

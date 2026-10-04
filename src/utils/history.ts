@@ -1,4 +1,4 @@
-import type { Message } from '../state/chatReducer'
+import type { Message, MessageStatus } from '../state/chatReducer'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -26,6 +26,11 @@ function extractText(item: Record<string, unknown>): string | undefined {
   }
 }
 
+/** Статус исходящего из истории. Если GREEN-API его не прислал — сообщение точно ушло, значит «отправлено». */
+function historyStatus(value: unknown): MessageStatus {
+  return value === 'delivered' || value === 'read' ? value : 'sent'
+}
+
 /**
  * Превращает одну запись из getChatHistory в сообщение для ленты.
  * Фото, голосовые и всё непонятное пропускаем — показываем только текст.
@@ -44,8 +49,7 @@ export function parseHistoryItem(item: unknown): Message | null {
     text,
     direction,
     timestamp: item.timestamp * 1000,
-    // В истории исходящие уже точно ушли с телефона, так что для нас они «отправлены»
-    status: direction === 'out' ? 'sent' : undefined,
+    status: direction === 'out' ? historyStatus(item.statusMessage) : undefined,
   }
 }
 

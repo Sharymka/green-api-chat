@@ -39,8 +39,16 @@ describe('parseHistoryItem', () => {
     })
   })
 
-  it('разбирает исходящее и считает его отправленным', () => {
-    expect(parseHistoryItem(outgoingItem)).toMatchObject({ direction: 'out', status: 'sent' })
+  it('разбирает исходящее вместе со статусом', () => {
+    expect(parseHistoryItem(outgoingItem)).toMatchObject({ direction: 'out', status: 'read' })
+  })
+
+  it('берёт статус «доставлено» и «прочитано» из истории', () => {
+    expect(parseHistoryItem({ ...outgoingItem, statusMessage: 'read' })?.status).toBe('read')
+    expect(parseHistoryItem({ ...outgoingItem, statusMessage: 'delivered' })?.status).toBe(
+      'delivered',
+    )
+    expect(parseHistoryItem({ ...outgoingItem, statusMessage: null })?.status).toBe('sent')
   })
 
   it('берёт текст из extendedTextMessage, если обычного нет', () => {

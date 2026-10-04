@@ -133,6 +133,40 @@ describe('отправка', () => {
   })
 })
 
+describe('статусы доставки', () => {
+  const sent: ChatAction[] = [
+    { type: 'chatOpened', chatId: IVAN },
+    { type: 'messageQueued', chatId: IVAN, id: 'local-1', text: 'Привет', timestamp: 1000 },
+    { type: 'messageSent', chatId: IVAN, id: 'local-1', idMessage: 'OUT-1' },
+  ]
+  const update = (status: 'sent' | 'delivered' | 'read' | 'failed', idMessage = 'OUT-1') =>
+    ({ type: 'messageStatusUpdated', chatId: IVAN, idMessage, status }) as const
+  const statusOf = (state: ChatState) => state.chats[0]?.messages[0]?.status
+
+  it('отправлено → доставлено → прочитано', () => {
+    expect(statusOf(reduce([...sent, update('delivered')]))).toBe('delivered')
+    expect(statusOf(reduce([...sent, update('delivered'), update('read')]))).toBe('read')
+  })
+
+  it('не откатывает статус назад, если уведомления пришли не по порядку', () => {
+    expect(statusOf(reduce([...sent, update('read'), update('delivered')]))).toBe('read')
+    expect(statusOf(reduce([...sent, update('read'), update('sent')]))).toBe('read')
+  })
+
+  it('показывает ошибку, если WhatsApp не смог доставить отправленное', () => {
+    expect(statusOf(reduce([...sent, update('failed')]))).toBe('failed')
+  })
+
+  it('не считает ошибкой уже доставленное сообщение', () => {
+    expect(statusOf(reduce([...sent, update('delivered'), update('failed')]))).toBe('delivered')
+  })
+
+  it('игнорирует статусы чужих сообщений', () => {
+    const before = reduce(sent)
+    expect(chatReducer(before, update('read', 'OTHER'))).toBe(before)
+  })
+})
+
 describe('получение', () => {
   it('добавляет входящее в чат и запоминает имя собеседника', () => {
     const state = reduce([

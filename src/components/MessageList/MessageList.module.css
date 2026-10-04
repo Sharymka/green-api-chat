@@ -104,6 +104,10 @@
   color: var(--color-check);
 }
 
+.row[data-direction='out'] .read {
+  color: var(--color-check-read);
+}
+
 .row[data-direction='out'] .failed {
   color: var(--color-danger);
 }

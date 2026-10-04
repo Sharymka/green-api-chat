@@ -98,6 +98,26 @@ describe('ChatProvider', () => {
     expect(loadChats(credentials.idInstance)).toEqual([])
   })
 
+  it('после перезагрузки возвращает в чат, который был открыт', () => {
+    saveCredentials(credentials)
+    saveChats(credentials.idInstance, [{ chatId: IVAN }])
+    const first = renderChat()
+    act(() => first.result.current.dispatch({ type: 'chatOpened', chatId: IVAN }))
+    first.unmount()
+
+    // «Перезагрузка» — новый провайдер читает всё из хранилища заново
+    const { result } = renderChat()
+    expect(result.current.state.activeChatId).toBe(IVAN)
+  })
+
+  it('не открывает чат, которого больше нет в списке', () => {
+    saveCredentials(credentials)
+    sessionStorage.setItem('green-api-chat:active-chat', '70000000000@c.us')
+
+    const { result } = renderChat()
+    expect(result.current.state.activeChatId).toBeNull()
+  })
+
   it('useChat вне провайдера сообщает понятную ошибку', () => {
     expect(() => renderHook(() => useChat())).toThrow(
       'useChat можно вызывать только внутри <ChatProvider>',
