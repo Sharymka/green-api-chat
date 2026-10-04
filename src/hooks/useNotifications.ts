@@ -8,10 +8,10 @@ import { nextDelay, wait } from '../utils/wait'
 /** Сколько секунд сервер держит запрос, ожидая новое уведомление. */
 const RECEIVE_TIMEOUT_SEC = 20
 /**
- * Минимальный промежуток между пустыми запросами. Обычно сервер сам держит запрос до 20 секунд,
- * но если он ответит «новых нет» сразу, без паузы цикл засыпал бы сервер запросами.
+ * Минимальный промежуток между пустыми запросами. По документации сервер держит запрос до 20 секунд,
+ * но на практике может ответить «новых нет» (408) сразу — тогда без паузы цикл засыпал бы сервер запросами.
  */
-const MIN_EMPTY_POLL_INTERVAL_MS = 1000
+const MIN_EMPTY_POLL_INTERVAL_MS = 3000
 
 /**
  * Фоновый цикл получения входящих сообщений (HTTP API GREEN-API):
@@ -25,9 +25,12 @@ const MIN_EMPTY_POLL_INTERVAL_MS = 1000
 export function useNotifications() {
   const { state, dispatch } = useChat()
   const { credentials } = state
+  // Пока нет ни одного чата, входящие показывать некуда — очередь не опрашиваем.
+  // Уведомления не пропадут: GREEN-API хранит их сутки, и цикл заберёт их, когда появится первый чат
+  const hasChats = state.chats.length > 0
 
   useEffect(() => {
-    if (!credentials) return
+    if (!credentials || !hasChats) return
     const creds = credentials
     const controller = new AbortController()
     const { signal } = controller
@@ -46,7 +49,7 @@ export function useNotifications() {
           dispatch({ type: 'connectionChanged', connection: 'online' })
           delay = null
           if (!notification) {
-            // Новых уведомлений нет — спрашиваем снова, но не чаще раза в секунду
+            // Новых уведомлений нет — спрашиваем снова, но не чаще раза в 3 секунды
             const elapsed = Date.now() - startedAt
             if (elapsed < MIN_EMPTY_POLL_INTERVAL_MS) {
               await wait(MIN_EMPTY_POLL_INTERVAL_MS - elapsed, signal)
@@ -80,5 +83,5 @@ export function useNotifications() {
       controller.abort()
       window.removeEventListener('offline', handleOffline)
     }
-  }, [credentials, dispatch])
+  }, [credentials, hasChats, dispatch])
 }

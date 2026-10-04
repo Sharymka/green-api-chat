@@ -55,9 +55,9 @@ function serverReplies(replies: (Notification | null | Error)[]) {
   })
 }
 
-function renderLoop() {
+function renderLoop(chats = [{ chatId: IVAN }]) {
   saveCredentials(credentials)
-  saveChats(credentials.idInstance, [{ chatId: IVAN }])
+  saveChats(credentials.idInstance, chats)
   return renderHook(
     () => {
       useNotifications()
@@ -90,19 +90,19 @@ describe('цикл получения сообщений', () => {
     expect(result.current.state.chats[0]?.messages.map((m) => m.text)).toEqual(['текст IN-1'])
   })
 
-  it('если сервер мгновенно ответил «пусто», спрашивает снова не раньше чем через секунду', async () => {
+  it('если сервер мгновенно ответил «пусто», спрашивает снова не раньше чем через 3 секунды', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     serverReplies([null, null, textNotification(1, 'IN-1')])
     const { result } = renderLoop()
 
     await waitFor(() => expect(receiveMock).toHaveBeenCalledTimes(1))
-    await act(() => vi.advanceTimersByTimeAsync(500))
+    await act(() => vi.advanceTimersByTimeAsync(2900))
     expect(receiveMock).toHaveBeenCalledTimes(1)
 
-    await act(() => vi.advanceTimersByTimeAsync(500))
+    await act(() => vi.advanceTimersByTimeAsync(100))
     expect(receiveMock).toHaveBeenCalledTimes(2)
 
-    await act(() => vi.advanceTimersByTimeAsync(1000))
+    await act(() => vi.advanceTimersByTimeAsync(3000))
     await waitFor(() => expect(result.current.state.chats[0]?.messages).toHaveLength(1))
   })
 
@@ -210,6 +210,17 @@ describe('цикл получения сообщений', () => {
 
     await waitFor(() => expect(result.current.state.chats[0]?.messages[0]?.status).toBe('read'))
     expect(deleteMock).toHaveBeenCalledWith(credentials, 3, expect.any(AbortSignal))
+  })
+
+  it('пока нет ни одного чата, очередь не опрашивает, а с первым чатом начинает', async () => {
+    serverReplies([])
+    const { result } = renderLoop([])
+    await act(() => Promise.resolve())
+    expect(receiveMock).not.toHaveBeenCalled()
+
+    act(() => result.current.dispatch({ type: 'chatOpened', chatId: IVAN }))
+
+    await waitFor(() => expect(receiveMock).toHaveBeenCalledTimes(1))
   })
 
   it('если токен больше не подходит — выходит из аккаунта и останавливается', async () => {
